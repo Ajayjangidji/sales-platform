@@ -1,0 +1,113 @@
+"use client";
+
+import type { Order } from "@/lib/types";
+import { Card, Badge } from "./ui";
+import { inr, statusColor, formatDateTime } from "@/lib/format";
+
+export function OrderDetailView({ order }: { order: Order }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2 flex-wrap">
+        <Badge className={statusColor(order.status)}>{order.status}</Badge>
+        <Badge className={statusColor(order.paymentStatus)}>
+          {order.paymentStatus === "Paid" ? `Paid · ${order.paymentMode}` : "Payment " + order.paymentStatus}
+        </Badge>
+      </div>
+
+      <Card className="p-4">
+        <p className="text-xs font-semibold text-slate-400 uppercase mb-2">Shop</p>
+        <div className="flex items-center gap-3">
+          <div className="text-3xl">{order.shopPhoto}</div>
+          <div>
+            <p className="font-bold text-slate-900">{order.shopName}</p>
+            <p className="text-sm text-slate-500">{order.shopContactName}</p>
+          </div>
+        </div>
+        <div className="mt-3 space-y-1.5 text-sm">
+          <a href={`tel:${order.shopMobile}`} className="flex items-center gap-2 text-brand-600 font-medium">
+            📞 {order.shopMobile}
+          </a>
+          <p className="text-slate-500">📍 {order.location.address}</p>
+          {order.location.mapsLink && (
+            <a href={order.location.mapsLink} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-brand-600 font-medium">
+              🗺️ Open in Maps
+            </a>
+          )}
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <p className="text-xs text-slate-400">Salesman</p>
+            <p className="font-semibold text-slate-800">🧑‍💼 {order.salesmanName}</p>
+          </div>
+          <div>
+            <p className="text-xs text-slate-400">Deliveryman</p>
+            <p className="font-semibold text-slate-800">🛵 {order.deliverymanName || "Unassigned"}</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <p className="text-xs font-semibold text-slate-400 uppercase mb-3">Products</p>
+        <div className="space-y-2.5">
+          {order.items.map((it, i) => (
+            <div key={i} className="flex justify-between text-sm">
+              <div>
+                <p className="font-semibold text-slate-800">{it.productName}</p>
+                <p className="text-xs text-slate-400">
+                  {it.cartons} {it.cartonName.toLowerCase()}(s) × {inr(it.pricePerCarton)}
+                </p>
+              </div>
+              <p className="font-bold text-slate-800">{inr(it.lineTotal)}</p>
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-between mt-3 pt-3 border-t border-slate-100">
+          <span className="font-semibold text-slate-500">Total Amount</span>
+          <span className="font-extrabold text-lg text-brand-600">{inr(order.totalAmount)}</span>
+        </div>
+      </Card>
+
+      {order.paymentStatus === "Paid" && (
+        <Card className="p-4">
+          <p className="text-xs font-semibold text-slate-400 uppercase mb-2">Payment</p>
+          <div className="text-sm space-y-1">
+            <Row label="Mode" value={order.paymentMode ?? "-"} />
+            <Row label="Amount received" value={inr(order.amountReceived ?? order.totalAmount)} />
+            {order.transactionId && <Row label="Transaction ID" value={order.transactionId} />}
+            {order.paidAt && <Row label="Paid at" value={formatDateTime(order.paidAt)} />}
+          </div>
+        </Card>
+      )}
+
+      <Card className="p-4">
+        <p className="text-xs font-semibold text-slate-400 uppercase mb-3">Order Timeline</p>
+        <div className="space-y-3">
+          {order.history.map((h, i) => (
+            <div key={i} className="flex gap-3">
+              <div className="flex flex-col items-center">
+                <div className="w-2.5 h-2.5 rounded-full bg-brand-500 mt-1" />
+                {i < order.history.length - 1 && <div className="w-px flex-1 bg-slate-200 my-1" />}
+              </div>
+              <div className="pb-1">
+                <p className="text-sm font-semibold text-slate-700">{h.status}</p>
+                <p className="text-xs text-slate-400">{formatDateTime(h.at)}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between">
+      <span className="text-slate-400">{label}</span>
+      <span className="font-semibold text-slate-700">{value}</span>
+    </div>
+  );
+}
