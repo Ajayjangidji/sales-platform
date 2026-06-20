@@ -1,4 +1,4 @@
-import { sql } from "@vercel/postgres";
+import { createPool, type VercelPool } from "@vercel/postgres";
 
 /**
  * Data is stored in a single key/value table (`app_kv`), one row per collection.
@@ -26,12 +26,44 @@ const DEFAULTS: Record<string, any> = {
   admin: { password: "admin123" },
 };
 
+/**
+ * Resolve a Postgres connection string from whatever env var the Vercel/Neon
+ * integration created (the exact name depends on the chosen prefix).
+ */
+function resolveConnectionString(): string | undefined {
+  const env = process.env;
+  const direct =
+    env.POSTGRES_URL ||
+    env.POSTGRES_PRISMA_URL ||
+    env.POSTGRES_DATABASE_URL ||
+    env.DATABASE_URL ||
+    env.POSTGRES_URL_NON_POOLING ||
+    env.DATABASE_URL_UNPOOLED;
+  if (direct) return direct;
+  // Last resort: any *_URL var that looks like a postgres connection string.
+  for (const [k, v] of Object.entries(env)) {
+    if (k.endsWith("_URL") && typeof v === "string" && /^postgres(ql)?:\/\//.test(v)) {
+      return v;
+    }
+  }
+  return undefined;
+}
+
+let _pool: VercelPool | null = null;
+function db(): VercelPool {
+  if (_pool) return _pool;
+  const connectionString = resolveConnectionString();
+  _pool = createPool(connectionString ? { connectionString } : undefined);
+  return _pool;
+}
+
 let schemaReady = false;
 
 export async function ensureSchema() {
-  await sql`CREATE TABLE IF NOT EXISTS app_kv (key text PRIMARY KEY, value jsonb NOT NULL)`;
+  const pool = db();
+  await pool.sql`CREATE TABLE IF NOT EXISTS app_kv (key text PRIMARY KEY, value jsonb NOT NULL)`;
   for (const [key, val] of Object.entries(DEFAULTS)) {
-    await sql`INSERT INTO app_kv (key, value)
+    await pool.sql`INSERT INTO app_kv (key, value)
               VALUES (${key}, ${JSON.stringify(val)}::jsonb)
               ON CONFLICT (key) DO NOTHING`;
   }
@@ -44,7 +76,7 @@ async function ready() {
 
 export async function readAll(): Promise<Collections> {
   await ready();
-  const { rows } = await sql`SELECT key, value FROM app_kv`;
+  const { rows } = await db().sql`SELECT key, value FROM app_kv`;
   const map: Record<string, any> = {};
   for (const r of rows) map[r.key] = r.value;
   return {
@@ -60,13 +92,13 @@ export async function readAll(): Promise<Collections> {
 
 export async function getValue(key: string): Promise<any> {
   await ready();
-  const { rows } = await sql`SELECT value FROM app_kv WHERE key = ${key}`;
+  const { rows } = await db().sql`SELECT value FROM app_kv WHERE key = ${key}`;
   return rows[0]?.value;
 }
 
 export async function setValue(key: string, value: any) {
   await ready();
-  await sql`INSERT INTO app_kv (key, value)
+  await db().sql`INSERT INTO app_kv (key, value)
             VALUES (${key}, ${JSON.stringify(value)}::jsonb)
             ON CONFLICT (key) DO UPDATE SET value = ${JSON.stringify(value)}::jsonb`;
 }
