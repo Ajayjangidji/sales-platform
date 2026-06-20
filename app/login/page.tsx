@@ -37,7 +37,7 @@ function LoginInner() {
   return (
     <div className="app-shell flex flex-col">
       {/* Hero */}
-      <div className="bg-gradient-to-br from-brand-600 via-brand-600 to-violet-600 px-6 pt-14 pb-12 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-br from-brand-600 via-brand-600 to-violet-600 px-6 pt-14 pb-14 text-white relative overflow-hidden">
         <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/10" />
         <div className="absolute -left-8 bottom-0 w-28 h-28 rounded-full bg-white/10" />
         <div className="relative">
@@ -51,7 +51,7 @@ function LoginInner() {
         </div>
       </div>
 
-      <div className="flex-1 px-6 -mt-6">
+      <div className="flex-1 px-6 mt-6">
         <div className="bg-white rounded-3xl shadow-card border border-slate-100 p-6">
           <h2 className="font-bold text-lg text-slate-900">Sign in</h2>
           <p className="text-sm text-slate-400 mb-5">
@@ -81,12 +81,12 @@ function LoginInner() {
               <div className="text-sm text-rose-600 bg-rose-50 rounded-lg px-3 py-2">{error}</div>
             )}
 
-            {bootstrapError && (
+            {/* {bootstrapError && (
               <div className="text-sm text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
                 ⚠️ Could not reach the database. Make sure Vercel Postgres is connected
                 (see README).
               </div>
-            )}
+            )} */}
 
             <Button className="w-full" size="lg" onClick={submit}>
               Login →
@@ -94,11 +94,11 @@ function LoginInner() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-slate-400 mt-6 mb-8 px-4">
+        {/* <p className="text-center text-xs text-slate-400 mt-6 mb-8 px-4">
           First-time setup: log in as <span className="font-semibold">admin</span> /{" "}
           <span className="font-semibold">admin123</span>, then add your products, salesmen
           and deliverymen. Change the admin password from Profile.
-        </p>
+        </p> */}
       </div>
     </div>
   );
