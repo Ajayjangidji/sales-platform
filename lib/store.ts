@@ -14,7 +14,7 @@ import type {
   PaymentMode,
 } from "./types";
 
-export const ADMIN_CREDENTIALS = { loginId: "admin", password: "Harsh@321" };
+export const ADMIN_CREDENTIALS = { loginId: "admin", password: "Harsh@3321" };
 
 export function uid(prefix: string) {
   return `${prefix}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;

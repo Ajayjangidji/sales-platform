@@ -240,12 +240,14 @@ function PersonForm({
 }) {
   const store = useStore();
   const [form, setForm] = useState({ ...blankPerson });
+  const [addingArea, setAddingArea] = useState(false);
   const lastKey = useRef("");
 
   useEffect(() => {
     const key = (initial?.id ?? "new") + open;
     if (lastKey.current === key) return;
     lastKey.current = key;
+    setAddingArea(false);
     if (initial) {
       setForm({
         ...blankPerson,
@@ -258,6 +260,19 @@ function PersonForm({
   }, [initial, open, kind]);
 
   const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
+
+  // Distinct areas already used by any staff member (excluding the "All" sentinel).
+  const areaOptions = Array.from(
+    new Set(
+      [...store.salesmen, ...store.deliverymen]
+        .map((p) => p.area?.trim())
+        .filter((a): a is string => !!a && a !== "All")
+    )
+  ).sort();
+  // Keep the currently-saved custom area selectable when editing.
+  if (form.area && form.area !== "All" && !areaOptions.includes(form.area)) {
+    areaOptions.unshift(form.area);
+  }
 
   function save() {
     if (!form.fullName.trim()) return alert("Full name is required");
@@ -328,7 +343,46 @@ function PersonForm({
             <Input value={form.mobile} onChange={(e) => set({ mobile: e.target.value })} inputMode="tel" />
           </Field>
           <Field label="Assigned area">
-            <Input value={form.area} onChange={(e) => set({ area: e.target.value })} placeholder="e.g. North Zone" />
+            {addingArea ? (
+              <div className="flex gap-2">
+                <Input
+                  value={form.area}
+                  onChange={(e) => set({ area: e.target.value })}
+                  placeholder="e.g. North Zone"
+                  autoFocus
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setAddingArea(false);
+                    set({ area: "All" });
+                  }}
+                >
+                  ✕
+                </Button>
+              </div>
+            ) : (
+              <Select
+                value={form.area || "All"}
+                onChange={(e) => {
+                  if (e.target.value === "__new__") {
+                    setAddingArea(true);
+                    set({ area: "" });
+                  } else {
+                    set({ area: e.target.value });
+                  }
+                }}
+              >
+                <option value="All">All areas</option>
+                {areaOptions.map((a) => (
+                  <option key={a} value={a}>
+                    {a}
+                  </option>
+                ))}
+                <option value="__new__">➕ Add new area…</option>
+              </Select>
+            )}
           </Field>
         </div>
         <Field label="Email (optional)">

@@ -210,7 +210,6 @@ export default function NewOrderPage() {
                     <Stepper
                       value={qty}
                       onChange={(v) => setCart({ ...cart, [p.id]: v })}
-                      max={p.availableCartons}
                     />
                   </Card>
                 );
@@ -317,26 +316,36 @@ export default function NewOrderPage() {
 function Stepper({
   value,
   onChange,
-  max,
 }: {
   value: number;
   onChange: (v: number) => void;
-  max: number;
 }) {
   return (
     <div className="flex items-center gap-2">
       <button
+        type="button"
         onClick={() => onChange(Math.max(0, value - 1))}
-        className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold disabled:opacity-40"
-        disabled={value === 0}
+        className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold disabled:opacity-40 shrink-0"
+        disabled={value <= 0}
       >
         −
       </button>
-      <span className="w-6 text-center font-bold text-slate-900">{value}</span>
+      <input
+        type="number"
+        inputMode="numeric"
+        min={0}
+        value={value === 0 ? "" : value}
+        placeholder="0"
+        onChange={(e) => {
+          const n = parseInt(e.target.value, 10);
+          onChange(Number.isNaN(n) || n < 0 ? 0 : n);
+        }}
+        className="w-12 text-center font-bold text-slate-900 border border-slate-200 rounded-lg py-1 outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+      />
       <button
-        onClick={() => onChange(Math.min(max, value + 1))}
-        className="w-7 h-7 rounded-lg bg-brand-600 text-white font-bold disabled:opacity-40"
-        disabled={value >= max}
+        type="button"
+        onClick={() => onChange(value + 1)}
+        className="w-7 h-7 rounded-lg bg-brand-600 text-white font-bold shrink-0"
       >
         +
       </button>
