@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
-import { Card, Badge, Button, Modal, Field, Select, EmptyState } from "@/components/ui";
+import { Card, Badge, Button, Modal, Field, Select, EmptyState, Thumb } from "@/components/ui";
 import { TopBar } from "@/components/shell";
 import { inr, statusColor, formatDateTime } from "@/lib/format";
 
@@ -45,7 +45,7 @@ export default function AdminOrderDetail() {
         <Card className="p-4">
           <p className="text-xs font-semibold text-slate-400 uppercase mb-2">Shop Details</p>
           <div className="flex items-center gap-3">
-            <div className="text-3xl">{order.shopPhoto}</div>
+            <Thumb value={order.shopPhoto} size="w-14 h-14" text="text-3xl" />
             <div>
               <p className="font-bold text-slate-900">{order.shopName}</p>
               <p className="text-sm text-slate-500">{order.shopContactName}</p>

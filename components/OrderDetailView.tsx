@@ -1,7 +1,7 @@
 "use client";
 
 import type { Order } from "@/lib/types";
-import { Card, Badge } from "./ui";
+import { Card, Badge, Thumb } from "./ui";
 import { inr, statusColor, formatDateTime } from "@/lib/format";
 
 export function OrderDetailView({ order }: { order: Order }) {
@@ -17,7 +17,7 @@ export function OrderDetailView({ order }: { order: Order }) {
       <Card className="p-4">
         <p className="text-xs font-semibold text-slate-400 uppercase mb-2">Shop</p>
         <div className="flex items-center gap-3">
-          <div className="text-3xl">{order.shopPhoto}</div>
+          <Thumb value={order.shopPhoto} size="w-14 h-14" text="text-3xl" />
           <div>
             <p className="font-bold text-slate-900">{order.shopName}</p>
             <p className="text-sm text-slate-500">{order.shopContactName}</p>

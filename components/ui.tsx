@@ -6,6 +6,38 @@ export function cx(...c: (string | false | null | undefined)[]) {
   return c.filter(Boolean).join(" ");
 }
 
+/** Renders an uploaded photo (data URL / http) as an image, otherwise the emoji. */
+export function Thumb({
+  value,
+  size = "w-11 h-11",
+  text = "text-2xl",
+  rounded = "rounded-xl",
+}: {
+  value: string;
+  size?: string;
+  text?: string;
+  rounded?: string;
+}) {
+  const isImg =
+    typeof value === "string" && (value.startsWith("data:") || value.startsWith("http"));
+  return (
+    <div
+      className={cx(
+        "flex items-center justify-center overflow-hidden shrink-0 bg-slate-50",
+        size,
+        rounded
+      )}
+    >
+      {isImg ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={value} alt="" className="w-full h-full object-cover" />
+      ) : (
+        <span className={text}>{value}</span>
+      )}
+    </div>
+  );
+}
+
 export function Button({
   children,
   variant = "primary",

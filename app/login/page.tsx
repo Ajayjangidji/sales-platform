@@ -4,34 +4,44 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { Button, Input, Field } from "@/components/ui";
-import { HydrationGate } from "@/components/shell";
 
 export default function LoginPage() {
-  return (
-    <HydrationGate>
-      <LoginInner />
-    </HydrationGate>
-  );
-}
-
-function LoginInner() {
   const router = useRouter();
-  const login = useStore((s) => s.login);
   const currentUser = useStore((s) => s.currentUser);
-  const bootstrapError = useStore((s) => s.bootstrapError);
+  const setCurrentUser = useStore((s) => s.setCurrentUser);
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Redirect once a session exists.
+  // If already logged in, go straight to the dashboard.
   useEffect(() => {
     if (currentUser) router.replace(`/${currentUser.role}/dashboard`);
   }, [currentUser, router]);
 
-  function submit() {
+  async function submit() {
+    if (loading) return;
     setError("");
-    const user = login(loginId, password);
-    if (!user) setError("Invalid credentials or inactive account.");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ loginId, password }),
+      });
+      const d = await res.json();
+      if (d.user) {
+        setCurrentUser(d.user); // redirect handled by the effect above
+      } else if (d.error === "inactive") {
+        setError("This account is inactive. Contact the admin.");
+      } else {
+        setError("Invalid login ID or password.");
+      }
+    } catch {
+      setError("Network error. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -81,24 +91,11 @@ function LoginInner() {
               <div className="text-sm text-rose-600 bg-rose-50 rounded-lg px-3 py-2">{error}</div>
             )}
 
-            {/* {bootstrapError && (
-              <div className="text-sm text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
-                ⚠️ Could not reach the database. Make sure Vercel Postgres is connected
-                (see README).
-              </div>
-            )} */}
-
-            <Button className="w-full" size="lg" onClick={submit}>
-              Login →
+            <Button className="w-full" size="lg" onClick={submit} disabled={loading}>
+              {loading ? "Signing in…" : "Login →"}
             </Button>
           </div>
         </div>
-
-        {/* <p className="text-center text-xs text-slate-400 mt-6 mb-8 px-4">
-          First-time setup: log in as <span className="font-semibold">admin</span> /{" "}
-          <span className="font-semibold">admin123</span>, then add your products, salesmen
-          and deliverymen. Change the admin password from Profile.
-        </p> */}
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import type { PaymentMode } from "@/lib/types";
-import { Card, Badge, Button, Modal, Field, Input, Textarea, EmptyState, cx } from "@/components/ui";
+import { Card, Badge, Button, Modal, Field, Input, Textarea, EmptyState, cx, Thumb } from "@/components/ui";
 import { TopBar, fileToDataUrl } from "@/components/shell";
 import { inr, statusColor, formatDateTime } from "@/lib/format";
 
@@ -71,7 +71,7 @@ export default function DeliveryOrderDetail() {
         {/* Shop + actions */}
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="text-3xl">{order.shopPhoto}</div>
+            <Thumb value={order.shopPhoto} size="w-14 h-14" text="text-3xl" />
             <div className="flex-1">
               <p className="font-bold text-slate-900">{order.shopName}</p>
               <p className="text-sm text-slate-500">{order.shopContactName}</p>

@@ -47,6 +47,7 @@ interface AppState {
   bootstrap: () => Promise<void>;
 
   login: (loginId: string, password: string) => CurrentUser | null;
+  setCurrentUser: (u: CurrentUser | null) => void;
   logout: () => void;
 
   addCategory: (name: string) => void;
@@ -164,6 +165,8 @@ export const useStore = create<AppState>()(
         }
         return null;
       },
+
+      setCurrentUser: (u) => set({ currentUser: u }),
 
       logout: () => set({ currentUser: null }),
 

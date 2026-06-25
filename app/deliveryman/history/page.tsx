@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useStore } from "@/lib/store";
-import { Card, Badge, EmptyState } from "@/components/ui";
+import { Card, Badge, EmptyState, Thumb } from "@/components/ui";
 import { TopBar } from "@/components/shell";
 import { inr, statusColor, formatDate } from "@/lib/format";
 
@@ -39,7 +39,7 @@ export default function DeliveryHistory() {
             {sorted.map((o) => (
               <Link key={o.id} href={`/deliveryman/orders/${o.id}`}>
                 <Card className="p-3.5 flex items-center gap-3">
-                  <div className="text-2xl">{o.shopPhoto}</div>
+                  <Thumb value={o.shopPhoto} />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-slate-900 truncate">{o.shopName}</p>
                     <p className="text-xs text-slate-400">

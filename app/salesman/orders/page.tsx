@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
-import { Card, Badge, cx, EmptyState } from "@/components/ui";
+import { Card, Badge, cx, EmptyState, Thumb } from "@/components/ui";
 import { TopBar } from "@/components/shell";
 import { inr, statusColor, timeAgo, isToday } from "@/lib/format";
 
@@ -49,7 +49,7 @@ export default function SalesmanOrders() {
               <Link key={o.id} href={`/salesman/orders/${o.id}`}>
                 <Card className="p-3.5">
                   <div className="flex items-start gap-3">
-                    <div className="text-2xl">{o.shopPhoto}</div>
+                    <Thumb value={o.shopPhoto} />
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between gap-2">
                         <p className="font-semibold text-slate-900 truncate">{o.shopName}</p>

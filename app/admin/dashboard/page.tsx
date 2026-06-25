@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useStore } from "@/lib/store";
-import { StatCard, Card, Badge } from "@/components/ui";
+import { StatCard, Card, Badge, Thumb } from "@/components/ui";
 import { TopBar, Avatar } from "@/components/shell";
 import { inr, isToday, statusColor, timeAgo } from "@/lib/format";
 
@@ -78,7 +78,7 @@ export default function AdminDashboard() {
             {recent.map((o) => (
               <Link key={o.id} href={`/admin/orders/${o.id}`}>
                 <Card className="p-3.5 flex items-center gap-3">
-                  <div className="text-2xl">{o.shopPhoto}</div>
+                  <Thumb value={o.shopPhoto} />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-slate-900 truncate">{o.shopName}</p>
                     <p className="text-xs text-slate-400">
