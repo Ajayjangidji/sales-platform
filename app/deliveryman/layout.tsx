@@ -2,11 +2,13 @@
 
 import { BottomNav, HydrationGate, useAuthGuard } from "@/components/shell";
 
-const nav = [
-  { href: "/deliveryman/dashboard", label: "Home", icon: "🏠" },
-  { href: "/deliveryman/orders", label: "Deliveries", icon: "🚚" },
-  { href: "/deliveryman/history", label: "History", icon: "🕘" },
-  { href: "/deliveryman/profile", label: "Profile", icon: "👤" },
+import type { NavItem } from "@/components/shell";
+
+const nav: NavItem[] = [
+  { href: "/deliveryman/dashboard", label: "Home", icon: "home" },
+  { href: "/deliveryman/orders", label: "Deliveries", icon: "deliveries" },
+  { href: "/deliveryman/history", label: "History", icon: "history" },
+  { href: "/deliveryman/profile", label: "Profile", icon: "profile" },
 ];
 
 export default function DeliverymanLayout({ children }: { children: React.ReactNode }) {

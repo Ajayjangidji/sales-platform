@@ -54,10 +54,10 @@ export default function ReportsPage() {
       <div className="px-4 py-4 space-y-5">
         {/* Payment summary */}
         <div className="grid grid-cols-2 gap-3">
-          <SummaryTile label="💵 Cash Collection" value={inr(stats.cashTotal)} tint="bg-emerald-50 text-emerald-700" />
-          <SummaryTile label="📲 Online Collection" value={inr(stats.onlineTotal)} tint="bg-blue-50 text-blue-700" />
-          <SummaryTile label="⏳ Pending Payments" value={String(stats.pendingPay)} tint="bg-amber-50 text-amber-700" />
-          <SummaryTile label="✅ Completed Deliveries" value={String(stats.completed)} tint="bg-violet-50 text-violet-700" />
+          <SummaryTile label="Cash Collection" value={inr(stats.cashTotal)} tint="bg-emerald-50 text-emerald-700" />
+          <SummaryTile label="Online Collection" value={inr(stats.onlineTotal)} tint="bg-blue-50 text-blue-700" />
+          <SummaryTile label="Pending Payments" value={String(stats.pendingPay)} tint="bg-amber-50 text-amber-700" />
+          <SummaryTile label="Completed Deliveries" value={String(stats.completed)} tint="bg-violet-50 text-violet-700" />
         </div>
 
         <ReportSection title="Sales by Salesman" rows={stats.bySalesman.map((r) => ({

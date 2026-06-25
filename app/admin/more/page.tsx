@@ -4,12 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { Card, Badge } from "@/components/ui";
+import { Icon, type IconName } from "@/components/icons";
 import { TopBar, Avatar } from "@/components/shell";
 
-const items = [
-  { href: "/admin/qr", icon: "📲", label: "QR Code Management", desc: "Online payment QR" },
-  { href: "/admin/reports", icon: "📊", label: "Reports & History", desc: "Sales, payments, delivery" },
-  { href: "/admin/profile", icon: "👤", label: "Profile & Password", desc: "Admin account settings" },
+const items: { href: string; icon: IconName; label: string; desc: string }[] = [
+  { href: "/admin/qr", icon: "qr", label: "QR Code Management", desc: "Online payment QR" },
+  { href: "/admin/reports", icon: "chart", label: "Reports & History", desc: "Sales, payments, delivery" },
+  { href: "/admin/profile", icon: "user", label: "Profile & Password", desc: "Admin account settings" },
 ];
 
 export default function AdminMore() {
@@ -21,7 +22,7 @@ export default function AdminMore() {
       <TopBar title="Settings & Tools" subtitle="Manage your account and sales infrastructure" />
       <div className="px-4 py-4 space-y-4">
         <Card className="p-4 flex items-center gap-3">
-          <Avatar emoji="🛡️" name="Admin" />
+          <Avatar name="Admin" />
           <div className="flex-1">
             <p className="font-bold text-slate-900">Administrator</p>
             <p className="text-xs text-slate-400">Full system access · active</p>
@@ -33,8 +34,8 @@ export default function AdminMore() {
           {items.map((it) => (
             <Link key={it.href} href={it.href}>
               <Card className="p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-xl">
-                  {it.icon}
+                <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
+                  <Icon name={it.icon} size={20} />
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold text-slate-900">{it.label}</p>
@@ -54,7 +55,7 @@ export default function AdminMore() {
           className="w-full"
         >
           <Card className="p-4 flex items-center justify-center gap-2 text-rose-600 font-semibold">
-            🚪 Logout
+            <Icon name="power" size={18} /> Logout
           </Card>
         </button>
 

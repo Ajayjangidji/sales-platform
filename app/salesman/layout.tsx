@@ -2,11 +2,13 @@
 
 import { BottomNav, HydrationGate, useAuthGuard } from "@/components/shell";
 
-const nav = [
-  { href: "/salesman/dashboard", label: "Home", icon: "🏠" },
-  { href: "/salesman/new-order", label: "New Order", icon: "➕" },
-  { href: "/salesman/orders", label: "My Orders", icon: "🧾" },
-  { href: "/salesman/profile", label: "Profile", icon: "👤" },
+import type { NavItem } from "@/components/shell";
+
+const nav: NavItem[] = [
+  { href: "/salesman/dashboard", label: "Home", icon: "home" },
+  { href: "/salesman/new-order", label: "New Order", icon: "plus" },
+  { href: "/salesman/orders", label: "My Orders", icon: "orders" },
+  { href: "/salesman/profile", label: "Profile", icon: "profile" },
 ];
 
 export default function SalesmanLayout({ children }: { children: React.ReactNode }) {

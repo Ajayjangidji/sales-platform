@@ -3,6 +3,7 @@
 import { useStore } from "@/lib/store";
 import { Card, Button, Field, Input, Badge } from "@/components/ui";
 import { TopBar, fileToDataUrl } from "@/components/shell";
+import { Icon } from "@/components/icons";
 import { statusColor } from "@/lib/format";
 
 export default function QRPage() {
@@ -26,7 +27,7 @@ export default function QRPage() {
               <img src={qr.image} alt="QR Code" className="w-full h-full object-contain" />
             ) : (
               <div className="text-center text-slate-300">
-                <div className="text-5xl mb-2">📷</div>
+                <Icon name="qr" size={48} className="mx-auto mb-2" />
                 <p className="text-sm">No QR uploaded</p>
               </div>
             )}

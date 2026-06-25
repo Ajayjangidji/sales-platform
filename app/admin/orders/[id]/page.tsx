@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { Card, Badge, Button, Modal, Field, Select, EmptyState, Thumb } from "@/components/ui";
+import { Icon } from "@/components/icons";
 import { TopBar } from "@/components/shell";
 import { inr, statusColor, formatDateTime } from "@/lib/format";
 
@@ -21,7 +22,7 @@ export default function AdminOrderDetail() {
     return (
       <div>
         <TopBar title="Order" back />
-        <EmptyState icon="🔍" title="Order not found" />
+        <EmptyState icon="search" title="Order not found" />
       </div>
     );
   }
@@ -53,17 +54,19 @@ export default function AdminOrderDetail() {
           </div>
           <div className="mt-3 space-y-1.5 text-sm">
             <a href={`tel:${order.shopMobile}`} className="flex items-center gap-2 text-brand-600 font-medium">
-              📞 {order.shopMobile}
+              <Icon name="phone" size={15} /> {order.shopMobile}
             </a>
-            <p className="text-slate-500">📍 {order.location.address}</p>
+            <p className="text-slate-500 flex items-center gap-2">
+              <Icon name="pin" size={15} /> {order.location.address}
+            </p>
             {order.location.mapsLink && (
               <a
                 href={order.location.mapsLink}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 text-brand-600 font-medium"
+                className="inline-flex items-center gap-1.5 text-brand-600 font-medium"
               >
-                🗺️ Open in Maps
+                <Icon name="map" size={15} /> Open in Maps
               </a>
             )}
           </div>
@@ -74,11 +77,11 @@ export default function AdminOrderDetail() {
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
               <p className="text-xs text-slate-400">Salesman</p>
-              <p className="font-semibold text-slate-800">🧑‍💼 {order.salesmanName}</p>
+              <p className="font-semibold text-slate-800 flex items-center gap-1.5"><Icon name="user" size={15} /> {order.salesmanName}</p>
             </div>
             <div>
               <p className="text-xs text-slate-400">Deliveryman</p>
-              <p className="font-semibold text-slate-800">🛵 {order.deliverymanName || "Unassigned"}</p>
+              <p className="font-semibold text-slate-800 flex items-center gap-1.5"><Icon name="truck" size={15} /> {order.deliverymanName || "Unassigned"}</p>
             </div>
           </div>
         </Card>
@@ -140,7 +143,7 @@ export default function AdminOrderDetail() {
         {/* Actions */}
         <div className="grid grid-cols-2 gap-3">
           <Button variant="secondary" onClick={() => setReassignOpen(true)}>
-            🔄 Reassign
+<Icon name="refresh" size={16} /> Reassign
           </Button>
           <Button
             variant="danger"
@@ -149,7 +152,7 @@ export default function AdminOrderDetail() {
               if (confirm("Cancel this order?")) cancelOrder(order.id);
             }}
           >
-            ✕ Cancel Order
+<Icon name="x" size={16} /> Cancel Order
           </Button>
         </div>
       </div>

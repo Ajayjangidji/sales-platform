@@ -16,11 +16,12 @@ import {
   cx,
 } from "@/components/ui";
 import { TopBar, PhotoPicker } from "@/components/shell";
+import { Icon } from "@/components/icons";
 import { inr, statusColor } from "@/lib/format";
 
 const emptyProduct: Omit<Product, "id" | "createdAt"> = {
   name: "",
-  photo: "📦",
+  photo: "",
   categoryId: null,
   cartonName: "Carton",
   itemsPerCarton: 24,
@@ -88,7 +89,7 @@ export default function ProductsPage() {
 
       <div className="px-4 py-4 space-y-4">
         <Input
-          placeholder="🔍 Search products…"
+          placeholder="Search products, SKUs, or categories…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -126,7 +127,7 @@ export default function ProductsPage() {
 
         {/* Product list */}
         {filtered.length === 0 ? (
-          <EmptyState icon="📦" title="No products found" subtitle="Try a different category or add a product." />
+          <EmptyState icon="box" title="No products found" subtitle="Try a different category or add a product." />
         ) : (
           <div className="space-y-2.5">
             {filtered.map((p) => {
@@ -134,12 +135,12 @@ export default function ProductsPage() {
               return (
                 <Card key={p.id} className="p-3.5">
                   <div className="flex gap-3">
-                    <div className="w-14 h-14 rounded-xl bg-slate-50 flex items-center justify-center text-3xl shrink-0 overflow-hidden">
+                    <div className="w-14 h-14 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center shrink-0 overflow-hidden">
                       {p.photo.startsWith("data:") || p.photo.startsWith("http") ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={p.photo} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        p.photo
+                        <Icon name="box" size={26} />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -160,13 +161,14 @@ export default function ProductsPage() {
                   </div>
                   <div className="flex gap-2 mt-3 pt-3 border-t border-slate-50">
                     <Button size="sm" variant="ghost" className="flex-1" onClick={() => setViewing(p)}>
-                      👁 View
+                      <Icon name="eye" size={16} /> View
                     </Button>
                     <Button size="sm" variant="ghost" className="flex-1" onClick={() => openEdit(p)}>
-                      ✏️ Edit
+                      <Icon name="edit" size={16} /> Edit
                     </Button>
                     <Button size="sm" variant="ghost" className="flex-1" onClick={() => toggleProductStatus(p.id)}>
-                      {p.status === "Active" ? "🚫 Off" : "✅ On"}
+                      <Icon name={p.status === "Active" ? "power" : "check"} size={16} />
+                      {p.status === "Active" ? "Off" : "On"}
                     </Button>
                     <Button
                       size="sm"
@@ -176,7 +178,7 @@ export default function ProductsPage() {
                         if (confirm(`Delete "${p.name}"?`)) deleteProduct(p.id);
                       }}
                     >
-                      🗑
+                      <Icon name="trash" size={16} />
                     </Button>
                   </div>
                 </Card>
@@ -412,7 +414,7 @@ function ProductForm({
     >
       <div className="space-y-4">
         <div className="flex items-center gap-4">
-          <PhotoPicker value={form.photo} onChange={(v) => set({ photo: v })} fallback="📦" />
+          <PhotoPicker value={form.photo} onChange={(v) => set({ photo: v })} />
           <p className="text-xs text-slate-400">
             Tap to upload a product photo (or keep the emoji icon).
           </p>

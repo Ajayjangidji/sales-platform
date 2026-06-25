@@ -2,12 +2,14 @@
 
 import { BottomNav, HydrationGate, useAuthGuard } from "@/components/shell";
 
-const nav = [
-  { href: "/admin/dashboard", label: "Home", icon: "🏠" },
-  { href: "/admin/products", label: "Products", icon: "📦" },
-  { href: "/admin/orders", label: "Orders", icon: "🧾" },
-  { href: "/admin/team", label: "Team", icon: "👥" },
-  { href: "/admin/more", label: "More", icon: "⚙️" },
+import type { NavItem } from "@/components/shell";
+
+const nav: NavItem[] = [
+  { href: "/admin/dashboard", label: "Home", icon: "home" },
+  { href: "/admin/products", label: "Products", icon: "products" },
+  { href: "/admin/orders", label: "Orders", icon: "orders" },
+  { href: "/admin/team", label: "Team", icon: "team" },
+  { href: "/admin/more", label: "More", icon: "more" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

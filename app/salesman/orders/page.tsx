@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { Card, Badge, cx, EmptyState, Thumb } from "@/components/ui";
+import { Icon } from "@/components/icons";
 import { TopBar } from "@/components/shell";
 import { inr, statusColor, timeAgo, isToday } from "@/lib/format";
 
@@ -42,7 +43,7 @@ export default function SalesmanOrders() {
         </div>
 
         {list.length === 0 ? (
-          <EmptyState icon="🧾" title="No orders here" subtitle="Create a new order from the + tab." />
+          <EmptyState icon="receipt" title="No orders here" subtitle="Create a new order from the + tab." />
         ) : (
           <div className="space-y-2.5">
             {list.map((o) => (
@@ -62,7 +63,7 @@ export default function SalesmanOrders() {
                         <Badge className={statusColor(o.status)}>{o.status}</Badge>
                         <Badge className={statusColor(o.paymentStatus)}>{o.paymentStatus}</Badge>
                       </div>
-                      <p className="text-xs text-slate-400 mt-2">🛵 {o.deliverymanName || "Unassigned"}</p>
+                      <p className="text-xs text-slate-400 mt-2 flex items-center gap-1.5"><Icon name="truck" size={13} /> {o.deliverymanName || "Unassigned"}</p>
                     </div>
                   </div>
                 </Card>

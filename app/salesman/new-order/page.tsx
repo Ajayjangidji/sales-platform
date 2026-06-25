@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import type { OrderItem, ShopLocation } from "@/lib/types";
 import { Button, Card, Field, Input, Textarea, cx, EmptyState } from "@/components/ui";
 import { TopBar, PhotoPicker } from "@/components/shell";
+import { Icon } from "@/components/icons";
 import { inr } from "@/lib/format";
 
 const steps = ["Shop", "Location", "Products", "Delivery", "Review"];
@@ -20,7 +21,7 @@ export default function NewOrderPage() {
     shopName: "",
     shopContactName: "",
     shopMobile: "",
-    shopPhoto: "🏪",
+    shopPhoto: "",
     address: "",
   });
   const [loc, setLoc] = useState<ShopLocation>({
@@ -136,7 +137,7 @@ export default function NewOrderPage() {
         {step === 0 && (
           <div className="space-y-4 animate-fade-in">
             <div className="flex items-center gap-4">
-              <PhotoPicker value={shop.shopPhoto} onChange={(v) => setShop({ ...shop, shopPhoto: v })} fallback="🏪" />
+              <PhotoPicker value={shop.shopPhoto} onChange={(v) => setShop({ ...shop, shopPhoto: v })} />
               <p className="text-xs text-slate-400">Take/upload a photo of the shop.</p>
             </div>
             <Field label="Shop name" required>
@@ -158,20 +159,25 @@ export default function NewOrderPage() {
         {step === 1 && (
           <div className="space-y-4 animate-fade-in">
             <Card className="p-5 text-center">
-              <div className="text-4xl mb-2">📍</div>
+              <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto mb-2">
+                <Icon name="pin" size={26} />
+              </div>
               <p className="font-semibold text-slate-900">Capture Shop Location</p>
               <p className="text-sm text-slate-400 mb-4">Use GPS to save the exact shop location.</p>
               <Button onClick={captureLocation} disabled={locating}>
-                {locating ? "Locating…" : loc.latitude ? "📍 Update GPS Location" : "📍 Get Current Location"}
+                <Icon name="pin" size={16} />
+                {locating ? "Locating…" : loc.latitude ? "Update GPS Location" : "Get Current Location"}
               </Button>
               {loc.latitude && (
                 <div className="mt-4 bg-emerald-50 rounded-xl p-3 text-sm text-left">
-                  <p className="font-semibold text-emerald-700">✅ Location captured</p>
+                  <p className="font-semibold text-emerald-700 flex items-center gap-1.5">
+                    <Icon name="check" size={14} /> Location captured
+                  </p>
                   <p className="text-emerald-600 text-xs mt-1">
                     Lat: {loc.latitude.toFixed(5)}, Lng: {loc.longitude?.toFixed(5)}
                   </p>
-                  <a href={loc.mapsLink} target="_blank" rel="noreferrer" className="text-brand-600 text-xs font-medium">
-                    🗺️ Preview on Maps
+                  <a href={loc.mapsLink} target="_blank" rel="noreferrer" className="text-brand-600 text-xs font-medium inline-flex items-center gap-1 mt-1">
+                    <Icon name="map" size={13} /> Preview on Maps
                   </a>
                 </div>
               )}
@@ -187,7 +193,7 @@ export default function NewOrderPage() {
         {step === 2 && (
           <div className="space-y-3 animate-fade-in">
             {activeProducts.length === 0 ? (
-              <EmptyState icon="📦" title="No active products" subtitle="Ask admin to add products." />
+              <EmptyState icon="box" title="No active products" subtitle="Ask admin to add products." />
             ) : (
               activeProducts.map((p) => {
                 const qty = cart[p.id] ?? 0;
@@ -228,7 +234,7 @@ export default function NewOrderPage() {
         {step === 3 && (
           <div className="space-y-3 animate-fade-in">
             {activeDeliverymen.length === 0 ? (
-              <EmptyState icon="🛵" title="No deliverymen available" subtitle="Ask admin to add deliverymen." />
+              <EmptyState icon="truck" title="No deliverymen available" subtitle="Ask admin to add deliverymen." />
             ) : (
               activeDeliverymen.map((d) => (
                 <Card
@@ -249,9 +255,9 @@ export default function NewOrderPage() {
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-slate-900">{d.fullName}</p>
-                    <p className="text-xs text-slate-400">📍 {d.area} · {d.vehicle || "—"}</p>
+                    <p className="text-xs text-slate-400 flex items-center gap-1.5"><Icon name="pin" size={12} /> {d.area} · {d.vehicle || "—"}</p>
                   </div>
-                  {deliverymanId === d.id && <span className="text-brand-600 text-xl">✓</span>}
+                  {deliverymanId === d.id && <span className="text-brand-600"><Icon name="check" size={20} /></span>}
                 </Card>
               ))
             )}
@@ -265,7 +271,7 @@ export default function NewOrderPage() {
               <p className="text-xs font-semibold text-slate-400 uppercase mb-2">Shop</p>
               <p className="font-bold text-slate-900">{shop.shopPhoto.length <= 2 ? shop.shopPhoto + " " : ""}{shop.shopName}</p>
               <p className="text-sm text-slate-500">{shop.shopContactName} · {shop.shopMobile}</p>
-              <p className="text-sm text-slate-500 mt-1">📍 {loc.address || shop.address}</p>
+              <p className="text-sm text-slate-500 mt-1 flex items-center gap-1.5"><Icon name="pin" size={14} /> {loc.address || shop.address}</p>
             </Card>
             <Card className="p-4">
               <p className="text-xs font-semibold text-slate-400 uppercase mb-3">Products</p>
@@ -285,7 +291,7 @@ export default function NewOrderPage() {
             <Card className="p-4">
               <p className="text-xs font-semibold text-slate-400 uppercase mb-1">Deliveryman</p>
               <p className="font-semibold text-slate-900">
-                🛵 {store.deliverymen.find((d) => d.id === deliverymanId)?.fullName}
+<span className="inline-flex items-center gap-1.5"><Icon name="truck" size={15} /> {store.deliverymen.find((d) => d.id === deliverymanId)?.fullName}</span>
               </p>
             </Card>
           </div>
@@ -305,7 +311,7 @@ export default function NewOrderPage() {
           </Button>
         ) : (
           <Button className="flex-1" onClick={submit}>
-            ✅ Submit Order
+<Icon name="check" size={18} /> Submit Order
           </Button>
         )}
       </div>

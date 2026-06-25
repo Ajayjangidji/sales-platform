@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { Card, Button, Field, Input } from "@/components/ui";
+import { Icon } from "@/components/icons";
 import { TopBar, Avatar } from "@/components/shell";
 
 export default function SalesmanProfile() {
@@ -26,7 +27,7 @@ export default function SalesmanProfile() {
     updateSalesman(me!.id, { password: pw });
     setPw("");
     setPw2("");
-    setMsg("✅ Password updated.");
+    setMsg("Password updated.");
   }
 
   return (
@@ -37,7 +38,7 @@ export default function SalesmanProfile() {
           <Avatar emoji={me.photo} name={me.fullName} />
           <div>
             <p className="font-bold text-lg text-slate-900">{me.fullName}</p>
-            <p className="text-sm text-slate-400">📍 {me.area}</p>
+            <p className="text-sm text-slate-400 flex items-center gap-1.5"><Icon name="pin" size={14} /> {me.area}</p>
           </div>
         </Card>
 
@@ -57,7 +58,7 @@ export default function SalesmanProfile() {
             <Field label="Confirm password">
               <Input type="password" value={pw2} onChange={(e) => setPw2(e.target.value)} />
             </Field>
-            {msg && <p className={`text-sm ${msg.startsWith("✅") ? "text-emerald-600" : "text-rose-600"}`}>{msg}</p>}
+            {msg && <p className={`text-sm ${msg.includes("updated") ? "text-emerald-600" : "text-rose-600"}`}>{msg}</p>}
             <Button className="w-full" onClick={changePassword}>
               Update Password
             </Button>
@@ -72,7 +73,7 @@ export default function SalesmanProfile() {
           className="w-full"
         >
           <Card className="p-4 flex items-center justify-center gap-2 text-rose-600 font-semibold">
-            🚪 Logout
+<Icon name="power" size={18} /> Logout
           </Card>
         </button>
       </div>

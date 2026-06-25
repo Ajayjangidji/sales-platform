@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { EmptyState } from "@/components/ui";
+import { Icon } from "@/components/icons";
 import { TopBar } from "@/components/shell";
 import { OrderDetailView } from "@/components/OrderDetailView";
 import { formatDateTime } from "@/lib/format";
@@ -23,7 +24,7 @@ export default function SalesmanOrderDetail() {
     return (
       <div>
         <TopBar title="Order" back />
-        <EmptyState icon="🔍" title="Order not found" />
+        <EmptyState icon="search" title="Order not found" />
       </div>
     );
   }
@@ -34,7 +35,9 @@ export default function SalesmanOrderDetail() {
       <div className="px-4 py-4">
         {isNew && (
           <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 mb-4 text-center animate-slide-up">
-            <div className="text-3xl mb-1">🎉</div>
+            <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-2">
+              <Icon name="checkCircle" size={28} />
+            </div>
             <p className="font-bold text-emerald-700">Order Submitted!</p>
             <p className="text-sm text-emerald-600">
               Sent to admin and assigned to {order.deliverymanName}.

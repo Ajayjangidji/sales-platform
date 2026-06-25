@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Icon, type IconName } from "./icons";
 
 export function cx(...c: (string | false | null | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -12,18 +13,20 @@ export function Thumb({
   size = "w-11 h-11",
   text = "text-2xl",
   rounded = "rounded-xl",
+  fallback = "store",
 }: {
   value: string;
   size?: string;
   text?: string;
   rounded?: string;
+  fallback?: IconName;
 }) {
   const isImg =
     typeof value === "string" && (value.startsWith("data:") || value.startsWith("http"));
   return (
     <div
       className={cx(
-        "flex items-center justify-center overflow-hidden shrink-0 bg-slate-50",
+        "flex items-center justify-center overflow-hidden shrink-0 bg-slate-100 text-slate-400",
         size,
         rounded
       )}
@@ -32,7 +35,7 @@ export function Thumb({
         // eslint-disable-next-line @next/next/no-img-element
         <img src={value} alt="" className="w-full h-full object-cover" />
       ) : (
-        <span className={text}>{value}</span>
+        <Icon name={fallback} size={22} />
       )}
     </div>
   );
@@ -126,7 +129,7 @@ export function StatCard({
 }: {
   label: string;
   value: string | number;
-  icon: string;
+  icon: React.ReactNode;
   tint?: "brand" | "emerald" | "amber" | "rose" | "blue" | "violet";
 }) {
   const tints: Record<string, string> = {
@@ -147,7 +150,7 @@ export function StatCard({
       >
         {icon}
       </div>
-      <div className="text-3xl font-extrabold text-slate-900 leading-none tracking-tight">
+      <div className="font-display text-3xl font-extrabold text-slate-900 leading-none tracking-tight">
         {value}
       </div>
       <div className="text-[13px] text-slate-500 mt-2 font-medium">{label}</div>
@@ -221,9 +224,9 @@ export function Modal({
           <h3 className="text-lg font-bold text-slate-900">{title}</h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 text-xl"
+            className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400"
           >
-            ✕
+            <Icon name="x" size={18} />
           </button>
         </div>
         <div className="px-5 py-4 overflow-y-auto flex-1">{children}</div>
@@ -236,17 +239,19 @@ export function Modal({
 }
 
 export function EmptyState({
-  icon = "📭",
+  icon = "inbox",
   title,
   subtitle,
 }: {
-  icon?: string;
+  icon?: IconName;
   title: string;
   subtitle?: string;
 }) {
   return (
     <div className="text-center py-14 px-6">
-      <div className="text-5xl mb-3">{icon}</div>
+      <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-300 flex items-center justify-center mx-auto mb-4">
+        <Icon name={icon} size={32} />
+      </div>
       <h3 className="font-semibold text-slate-700">{title}</h3>
       {subtitle && <p className="text-sm text-slate-400 mt-1">{subtitle}</p>}
     </div>

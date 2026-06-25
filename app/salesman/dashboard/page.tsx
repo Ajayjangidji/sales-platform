@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { StatCard, Card, Badge, Button, Thumb } from "@/components/ui";
+import { Icon } from "@/components/icons";
 import { BrandBar } from "@/components/shell";
 import { inr, isToday, statusColor, timeAgo } from "@/lib/format";
 
@@ -22,7 +23,7 @@ export default function SalesmanDashboard() {
 
   return (
     <div>
-      <BrandBar emoji="🧑‍💼" name={user?.name ?? "Salesman"} welcome={`Welcome, ${user?.name?.split(" ")[0] ?? "Salesman"}`} />
+      <BrandBar name={user?.name ?? "Salesman"} welcome={`Welcome, ${user?.name?.split(" ")[0] ?? "Salesman"}`} />
 
       <div className="px-4 py-4 space-y-5">
         <Link href="/salesman/new-order">
@@ -31,19 +32,19 @@ export default function SalesmanDashboard() {
               <p className="text-lg font-bold">Create New Order</p>
               <p className="text-brand-100 text-sm">Visit a shop & place an order</p>
             </div>
-            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-2xl">
-              ➕
+            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+              <Icon name="plus" size={26} />
             </div>
           </div>
         </Link>
 
         <div className="grid grid-cols-3 gap-3">
-          <StatCard label="Today's Orders" value={today.length} icon="📅" tint="brand" />
-          <StatCard label="Total Orders" value={orders.length} icon="🧾" tint="violet" />
-          <StatCard label="Pending" value={pending.length} icon="⏳" tint="amber" />
-          <StatCard label="Assigned" value={assigned.length} icon="🚚" tint="blue" />
-          <StatCard label="Delivered" value={delivered.length} icon="✅" tint="emerald" />
-          <StatCard label="Cancelled" value={cancelled.length} icon="✕" tint="rose" />
+          <StatCard label="Today's Orders" value={today.length} icon={<Icon name="calendar" />} tint="brand" />
+          <StatCard label="Total Orders" value={orders.length} icon={<Icon name="receipt" />} tint="violet" />
+          <StatCard label="Pending" value={pending.length} icon={<Icon name="clock" />} tint="amber" />
+          <StatCard label="Assigned" value={assigned.length} icon={<Icon name="truck" />} tint="blue" />
+          <StatCard label="Delivered" value={delivered.length} icon={<Icon name="checkCircle" />} tint="emerald" />
+          <StatCard label="Cancelled" value={cancelled.length} icon={<Icon name="x" />} tint="rose" />
         </div>
 
         <div>

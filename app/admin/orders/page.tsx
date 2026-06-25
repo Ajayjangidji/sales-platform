@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { Card, Badge, cx, EmptyState, Thumb } from "@/components/ui";
+import { Icon } from "@/components/icons";
 import { TopBar } from "@/components/shell";
 import { inr, statusColor, timeAgo, isToday } from "@/lib/format";
 
@@ -43,7 +44,7 @@ export default function AdminOrders() {
       <div className="px-4 py-4 space-y-4">
         <input
           className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
-          placeholder="🔍 Search by shop or order no…"
+          placeholder="Search by shop or order no…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -63,7 +64,7 @@ export default function AdminOrders() {
         </div>
 
         {list.length === 0 ? (
-          <EmptyState icon="🧾" title="No orders" subtitle="Orders placed by salesmen appear here." />
+          <EmptyState icon="receipt" title="No orders" subtitle="Orders placed by salesmen appear here." />
         ) : (
           <div className="space-y-2.5">
             {list.map((o) => (
@@ -99,7 +100,9 @@ function OrderCard({ o }: { o: Order }) {
             </Badge>
           </div>
           <p className="text-xs text-slate-400 mt-2">
-            🧑‍💼 {o.salesmanName} → 🛵 {o.deliverymanName || "Unassigned"}
+<span className="inline-flex items-center gap-1"><Icon name="user" size={12} /> {o.salesmanName}</span>
+            <span className="mx-1">→</span>
+            <span className="inline-flex items-center gap-1"><Icon name="truck" size={12} /> {o.deliverymanName || "Unassigned"}</span>
           </p>
         </div>
       </div>

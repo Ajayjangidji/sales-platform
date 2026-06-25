@@ -2,6 +2,7 @@
 
 import type { Order } from "@/lib/types";
 import { Card, Badge, Thumb } from "./ui";
+import { Icon } from "./icons";
 import { inr, statusColor, formatDateTime } from "@/lib/format";
 
 export function OrderDetailView({ order }: { order: Order }) {
@@ -25,12 +26,14 @@ export function OrderDetailView({ order }: { order: Order }) {
         </div>
         <div className="mt-3 space-y-1.5 text-sm">
           <a href={`tel:${order.shopMobile}`} className="flex items-center gap-2 text-brand-600 font-medium">
-            📞 {order.shopMobile}
+            <Icon name="phone" size={15} /> {order.shopMobile}
           </a>
-          <p className="text-slate-500">📍 {order.location.address}</p>
+          <p className="text-slate-500 flex items-center gap-2">
+            <Icon name="pin" size={15} /> {order.location.address}
+          </p>
           {order.location.mapsLink && (
-            <a href={order.location.mapsLink} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-brand-600 font-medium">
-              🗺️ Open in Maps
+            <a href={order.location.mapsLink} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-brand-600 font-medium">
+              <Icon name="map" size={15} /> Open in Maps
             </a>
           )}
         </div>
@@ -40,11 +43,11 @@ export function OrderDetailView({ order }: { order: Order }) {
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
             <p className="text-xs text-slate-400">Salesman</p>
-            <p className="font-semibold text-slate-800">🧑‍💼 {order.salesmanName}</p>
+            <p className="font-semibold text-slate-800 flex items-center gap-1.5"><Icon name="user" size={15} /> {order.salesmanName}</p>
           </div>
           <div>
             <p className="text-xs text-slate-400">Deliveryman</p>
-            <p className="font-semibold text-slate-800">🛵 {order.deliverymanName || "Unassigned"}</p>
+            <p className="font-semibold text-slate-800 flex items-center gap-1.5"><Icon name="truck" size={15} /> {order.deliverymanName || "Unassigned"}</p>
           </div>
         </div>
       </Card>

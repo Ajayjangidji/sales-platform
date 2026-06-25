@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { Card, Badge, cx, EmptyState, Thumb } from "@/components/ui";
+import { Icon } from "@/components/icons";
 import { TopBar } from "@/components/shell";
 import { inr, statusColor, isToday } from "@/lib/format";
 
@@ -47,7 +48,7 @@ export default function DeliverymanOrders() {
         </div>
 
         {list.length === 0 ? (
-          <EmptyState icon="🚚" title="No deliveries" subtitle="Assigned orders will appear here." />
+          <EmptyState icon="truck" title="No deliveries" subtitle="Assigned orders will appear here." />
         ) : (
           <div className="space-y-2.5">
             {list.map((o) => (
@@ -60,7 +61,7 @@ export default function DeliverymanOrders() {
                         <p className="font-semibold text-slate-900 truncate">{o.shopName}</p>
                         <span className="font-bold">{inr(o.totalAmount)}</span>
                       </div>
-                      <p className="text-xs text-slate-400 mt-0.5 truncate">📍 {o.location.address}</p>
+                      <p className="text-xs text-slate-400 mt-0.5 truncate flex items-center gap-1.5"><Icon name="pin" size={13} /> {o.location.address}</p>
                       <p className="text-xs text-slate-400">{o.items.length} item(s) · {o.orderNo}</p>
                       <div className="flex gap-2 mt-2">
                         <Badge className={statusColor(o.status)}>{o.status}</Badge>

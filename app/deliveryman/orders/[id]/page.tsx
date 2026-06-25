@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import type { PaymentMode } from "@/lib/types";
 import { Card, Badge, Button, Modal, Field, Input, Textarea, EmptyState, cx, Thumb } from "@/components/ui";
+import { Icon } from "@/components/icons";
 import { TopBar, fileToDataUrl } from "@/components/shell";
 import { inr, statusColor, formatDateTime } from "@/lib/format";
 
@@ -27,7 +28,7 @@ export default function DeliveryOrderDetail() {
     return (
       <div>
         <TopBar title="Delivery" back />
-        <EmptyState icon="🔍" title="Order not found" />
+        <EmptyState icon="search" title="Order not found" />
       </div>
     );
   }
@@ -77,11 +78,13 @@ export default function DeliveryOrderDetail() {
               <p className="text-sm text-slate-500">{order.shopContactName}</p>
             </div>
           </div>
-          <p className="text-sm text-slate-500 mt-3">📍 {order.location.address}</p>
+          <p className="text-sm text-slate-500 mt-3 flex items-center gap-2">
+            <Icon name="pin" size={15} /> {order.location.address}
+          </p>
           <div className="grid grid-cols-2 gap-2 mt-3">
             <a href={`tel:${order.shopMobile}`}>
               <Button variant="secondary" className="w-full" size="sm">
-                📞 Call Shop
+                <Icon name="phone" size={16} /> Call Shop
               </Button>
             </a>
             <a
@@ -93,7 +96,7 @@ export default function DeliveryOrderDetail() {
               rel="noreferrer"
             >
               <Button className="w-full" size="sm">
-                🗺️ Open in Map
+                <Icon name="map" size={16} /> Open in Map
               </Button>
             </a>
           </div>
@@ -121,7 +124,7 @@ export default function DeliveryOrderDetail() {
                     checked[i] || done ? "bg-emerald-500 text-white" : "border-2 border-slate-300"
                   )}
                 >
-                  {checked[i] || done ? "✓" : ""}
+                  {checked[i] || done ? <Icon name="check" size={15} /> : ""}
                 </span>
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-slate-800">{it.productName}</p>
@@ -143,7 +146,9 @@ export default function DeliveryOrderDetail() {
         {done && (
           <Card className="p-4 bg-emerald-50 border-emerald-100">
             <div className="text-center">
-              <div className="text-3xl mb-1">✅</div>
+              <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-2">
+                <Icon name="checkCircle" size={28} />
+              </div>
               <p className="font-bold text-emerald-700">Delivery Completed</p>
               <p className="text-sm text-emerald-600">
                 {inr(order.amountReceived ?? order.totalAmount)} collected via {order.paymentMode}
@@ -160,11 +165,11 @@ export default function DeliveryOrderDetail() {
           <div className="space-y-2">
             {order.status === "Deliveryman Assigned" || order.status === "Accepted by Deliveryman" ? (
               <Button className="w-full" size="lg" onClick={() => updateOrderStatus(order.id, "Out for Delivery")}>
-                🛵 Start Delivery
+                <Icon name="truck" size={18} /> Start Delivery
               </Button>
             ) : order.status === "Out for Delivery" ? (
               <Button className="w-full" size="lg" onClick={() => updateOrderStatus(order.id, "Reached at Shop")}>
-                📍 Mark Reached at Shop
+                <Icon name="pin" size={18} /> Mark Reached at Shop
               </Button>
             ) : (
               <Button className="w-full" size="lg" disabled={!allChecked} onClick={openPayment}>
@@ -205,7 +210,7 @@ export default function DeliveryOrderDetail() {
               Cancel
             </Button>
             <Button className="flex-1" disabled={!mode} onClick={confirmPayment}>
-              ✅ Confirm & Complete
+              <Icon name="check" size={16} /> Confirm & Complete
             </Button>
           </>
         }
@@ -225,7 +230,7 @@ export default function DeliveryOrderDetail() {
                 mode === "Cash" ? "border-emerald-500 bg-emerald-50" : "border-slate-200"
               )}
             >
-              <div className="text-3xl mb-1">💵</div>
+              <div className="flex justify-center mb-1.5 text-slate-700"><Icon name="cash" size={28} /></div>
               <p className="font-semibold text-slate-800">Cash</p>
             </button>
             <button
@@ -235,7 +240,7 @@ export default function DeliveryOrderDetail() {
                 mode === "Online" ? "border-brand-500 bg-brand-50" : "border-slate-200"
               )}
             >
-              <div className="text-3xl mb-1">📲</div>
+              <div className="flex justify-center mb-1.5 text-slate-700"><Icon name="online" size={28} /></div>
               <p className="font-semibold text-slate-800">Online</p>
             </button>
           </div>
@@ -267,8 +272,8 @@ export default function DeliveryOrderDetail() {
                       <img src={qr.image} alt="QR" className="w-full h-full object-contain" />
                     ) : (
                       <div className="text-slate-300 text-center">
-                        <div className="text-4xl">📷</div>
-                        <p className="text-xs">QR not set by admin</p>
+                        <Icon name="qr" size={36} className="mx-auto" />
+                        <p className="text-xs mt-1">QR not set by admin</p>
                       </div>
                     )}
                   </div>
@@ -291,7 +296,7 @@ export default function DeliveryOrderDetail() {
                     if (f) setScreenshot(await fileToDataUrl(f));
                   }}
                 />
-                {screenshot && <p className="text-xs text-emerald-600 mt-1">✅ Screenshot attached</p>}
+                {screenshot && <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1"><Icon name="check" size={13} /> Screenshot attached</p>}
               </label>
             </div>
           )}

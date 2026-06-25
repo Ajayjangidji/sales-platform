@@ -22,7 +22,7 @@ export default function AdminProfile() {
     setCur("");
     setPw("");
     setPw2("");
-    setMsg("✅ Password updated successfully.");
+    setMsg("Password updated successfully.");
   }
 
   return (
@@ -30,7 +30,7 @@ export default function AdminProfile() {
       <TopBar title="Profile" subtitle="Admin account" back />
       <div className="px-4 py-4 space-y-4">
         <Card className="p-5 flex items-center gap-4">
-          <Avatar emoji="🛡️" name="Admin" />
+          <Avatar name="Admin" />
           <div>
             <p className="font-bold text-lg text-slate-900">Administrator</p>
             <p className="text-sm text-slate-400">Login ID: {ADMIN_CREDENTIALS.loginId}</p>
@@ -50,7 +50,7 @@ export default function AdminProfile() {
               <Input type="password" value={pw2} onChange={(e) => setPw2(e.target.value)} />
             </Field>
             {msg && (
-              <p className={`text-sm ${msg.startsWith("✅") ? "text-emerald-600" : "text-rose-600"}`}>
+              <p className={`text-sm ${msg.includes("updated") ? "text-emerald-600" : "text-rose-600"}`}>
                 {msg}
               </p>
             )}

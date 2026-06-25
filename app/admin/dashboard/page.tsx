@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { StatCard, Card, Badge, Thumb } from "@/components/ui";
+import { Icon } from "@/components/icons";
 import { BrandBar } from "@/components/shell";
 import { inr, isToday, statusColor, timeAgo } from "@/lib/format";
 
@@ -30,7 +31,7 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <BrandBar emoji="🛡️" name="Admin" welcome="Welcome back, Admin" />
+      <BrandBar name="Admin" welcome="Welcome back, Admin" />
 
       <div className="px-4 py-4 space-y-5">
         {/* Collection banner */}
@@ -39,14 +40,18 @@ export default function AdminDashboard() {
           <p className="text-[11px] font-semibold tracking-[0.15em] text-brand-100">
             TOTAL COLLECTION
           </p>
-          <p className="text-4xl font-extrabold mt-2 tracking-tight">{inr(cash + online)}</p>
+          <p className="font-display text-4xl font-extrabold mt-2 tracking-tight">{inr(cash + online)}</p>
           <div className="flex gap-3 mt-4">
             <div className="flex-1 bg-white/15 rounded-2xl px-3.5 py-2.5">
-              <p className="text-[11px] text-brand-100">💵 Cash</p>
+              <p className="text-[11px] text-brand-100 flex items-center gap-1.5">
+                <Icon name="cash" size={14} /> Cash
+              </p>
               <p className="font-bold text-lg">{inr(cash)}</p>
             </div>
             <div className="flex-1 bg-white/15 rounded-2xl px-3.5 py-2.5">
-              <p className="text-[11px] text-brand-100">📲 Online</p>
+              <p className="text-[11px] text-brand-100 flex items-center gap-1.5">
+                <Icon name="online" size={14} /> Online
+              </p>
               <p className="font-bold text-lg">{inr(online)}</p>
             </div>
           </div>
@@ -54,12 +59,12 @@ export default function AdminDashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3">
-          <StatCard label="Products" value={products.length} icon="📦" tint="brand" />
-          <StatCard label="Salesmen" value={salesmen.length} icon="🧑‍💼" tint="blue" />
-          <StatCard label="Deliverymen" value={deliverymen.length} icon="🛵" tint="emerald" />
-          <StatCard label="Today's Orders" value={todayOrders.length} icon="🧾" tint="violet" />
-          <StatCard label="Pending Review" value={pending.length} icon="⏳" tint="amber" />
-          <StatCard label="In Progress" value={assigned.length} icon="🚚" tint="blue" />
+          <StatCard label="Products" value={products.length} icon={<Icon name="box" />} tint="brand" />
+          <StatCard label="Salesmen" value={salesmen.length} icon={<Icon name="users" />} tint="blue" />
+          <StatCard label="Deliverymen" value={deliverymen.length} icon={<Icon name="truck" />} tint="emerald" />
+          <StatCard label="Today's Orders" value={todayOrders.length} icon={<Icon name="receipt" />} tint="violet" />
+          <StatCard label="Pending Review" value={pending.length} icon={<Icon name="clock" />} tint="amber" />
+          <StatCard label="In Progress" value={assigned.length} icon={<Icon name="progress" />} tint="blue" />
         </div>
 
         {/* Recent orders */}

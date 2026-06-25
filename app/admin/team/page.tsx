@@ -15,6 +15,7 @@ import {
   EmptyState,
 } from "@/components/ui";
 import { TopBar, PhotoPicker } from "@/components/shell";
+import { Icon } from "@/components/icons";
 import { statusColor } from "@/lib/format";
 
 type Tab = "salesmen" | "deliverymen";
@@ -46,10 +47,10 @@ export default function TeamPage() {
         {/* Tabs */}
         <div className="bg-slate-100 rounded-xl p-1 flex">
           <TabBtn active={tab === "salesmen"} onClick={() => setTab("salesmen")}>
-            🧑‍💼 Salesmen ({store.salesmen.length})
+            <span className="inline-flex items-center gap-1.5"><Icon name="users" size={15} /> Salesmen ({store.salesmen.length})</span>
           </TabBtn>
           <TabBtn active={tab === "deliverymen"} onClick={() => setTab("deliverymen")}>
-            🛵 Delivery ({store.deliverymen.length})
+            <span className="inline-flex items-center gap-1.5"><Icon name="truck" size={15} /> Delivery ({store.deliverymen.length})</span>
           </TabBtn>
         </div>
 
@@ -120,7 +121,7 @@ function PersonList({
   const [newPw, setNewPw] = useState("");
 
   if (people.length === 0)
-    return <EmptyState icon="👥" title="No accounts yet" subtitle="Tap + Add to create one." />;
+    return <EmptyState icon="users" title="No accounts yet" subtitle="Tap + Add to create one." />;
 
   const toggle = kind === "salesman" ? store.toggleSalesmanStatus : store.toggleDeliverymanStatus;
   const del = kind === "salesman" ? store.deleteSalesman : store.deleteDeliveryman;
@@ -131,12 +132,12 @@ function PersonList({
       {people.map((p) => (
         <Card key={p.id} className="p-3.5">
           <div className="flex gap-3 items-center">
-            <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-2xl overflow-hidden shrink-0">
+            <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center overflow-hidden shrink-0">
               {p.photo.startsWith("data:") || p.photo.startsWith("http") ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={p.photo} alt="" className="w-full h-full object-cover" />
               ) : (
-                p.photo
+                <Icon name="user" size={22} />
               )}
             </div>
             <div className="flex-1 min-w-0">
@@ -144,26 +145,29 @@ function PersonList({
                 <p className="font-semibold text-slate-900 truncate">{p.fullName}</p>
                 <Badge className={statusColor(p.status)}>{p.status}</Badge>
               </div>
-              <p className="text-xs text-slate-400">
-                📱 {p.mobile} · 📍 {p.area}
+              <p className="text-xs text-slate-400 flex items-center gap-1.5 mt-1">
+                <Icon name="phone" size={12} /> {p.mobile}
+                <span className="text-slate-300">·</span>
+                <Icon name="pin" size={12} /> {p.area}
               </p>
-              <p className="text-xs text-slate-400 mt-0.5">
-                🔑 {p.loginId} / {p.password}
+              <p className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+                <Icon name="key" size={12} /> {p.loginId} / {p.password}
                 {kind === "deliveryman" && (p as Deliveryman).vehicle
-                  ? " · 🚚 " + (p as Deliveryman).vehicle
+                  ? " · " + (p as Deliveryman).vehicle
                   : ""}
               </p>
             </div>
           </div>
           <div className="flex gap-1.5 mt-3 pt-3 border-t border-slate-50 flex-wrap">
             <Button size="sm" variant="ghost" onClick={() => onEdit(p)}>
-              ✏️ Edit
+              <Icon name="edit" size={15} /> Edit
             </Button>
             <Button size="sm" variant="ghost" onClick={() => toggle(p.id)}>
-              {p.status === "Active" ? "🚫 Deactivate" : "✅ Activate"}
+              <Icon name={p.status === "Active" ? "power" : "check"} size={15} />
+              {p.status === "Active" ? "Deactivate" : "Activate"}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setResetFor(p.id)}>
-              🔄 Reset PW
+              <Icon name="refresh" size={15} /> Reset PW
             </Button>
             <Button
               size="sm"
@@ -173,7 +177,7 @@ function PersonList({
                 if (confirm(`Delete ${p.fullName}? Past orders are kept.`)) del(p.id);
               }}
             >
-              🗑
+              <Icon name="trash" size={15} />
             </Button>
           </div>
         </Card>
@@ -255,7 +259,7 @@ function PersonForm({
         vehicle: (initial as Deliveryman).vehicle ?? "",
       });
     } else {
-      setForm({ ...blankPerson, photo: kind === "deliveryman" ? "🛵" : "🧑‍💼" });
+      setForm({ ...blankPerson, photo: "" });
     }
   }, [initial, open, kind]);
 
@@ -359,7 +363,7 @@ function PersonForm({
                     set({ area: "All" });
                   }}
                 >
-                  ✕
+                  <Icon name="x" size={16} />
                 </Button>
               </div>
             ) : (
@@ -380,7 +384,7 @@ function PersonForm({
                     {a}
                   </option>
                 ))}
-                <option value="__new__">➕ Add new area…</option>
+                <option value="__new__">+ Add new area…</option>
               </Select>
             )}
           </Field>

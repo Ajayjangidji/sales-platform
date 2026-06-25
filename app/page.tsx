@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
+import { Icon } from "@/components/icons";
 
 export default function Home() {
   const router = useRouter();
@@ -17,7 +18,9 @@ export default function Home() {
   return (
     <div className="app-shell flex items-center justify-center">
       <div className="text-center animate-fade-in">
-        <div className="text-5xl mb-3">📦</div>
+        <div className="w-14 h-14 rounded-2xl bg-brand-600 text-white flex items-center justify-center mx-auto mb-3 animate-pulse">
+          <Icon name="box" size={30} />
+        </div>
         <div className="text-sm text-slate-400">Loading SalesFlow…</div>
       </div>
     </div>
