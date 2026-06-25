@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
-import { Card } from "@/components/ui";
+import { Card, Badge } from "@/components/ui";
 import { TopBar, Avatar } from "@/components/shell";
 
 const items = [
@@ -18,14 +18,15 @@ export default function AdminMore() {
 
   return (
     <div>
-      <TopBar title="More" subtitle="Settings & tools" />
+      <TopBar title="Settings & Tools" subtitle="Manage your account and sales infrastructure" />
       <div className="px-4 py-4 space-y-4">
         <Card className="p-4 flex items-center gap-3">
           <Avatar emoji="🛡️" name="Admin" />
-          <div>
+          <div className="flex-1">
             <p className="font-bold text-slate-900">Administrator</p>
-            <p className="text-xs text-slate-400">Full system access</p>
+            <p className="text-xs text-slate-400">Full system access · active</p>
           </div>
+          <Badge className="bg-brand-100 text-brand-700">ADMIN ROLE</Badge>
         </Card>
 
         <div className="space-y-2.5">
@@ -57,7 +58,7 @@ export default function AdminMore() {
           </Card>
         </button>
 
-        <p className="text-center text-xs text-slate-300 pt-2">SalesFlow v1.0 · Demo build</p>
+        <p className="text-center text-xs text-slate-300 pt-2">SalesFlow v1.0 · Stable Build</p>
       </div>
     </div>
   );

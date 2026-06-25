@@ -130,25 +130,27 @@ export function StatCard({
   tint?: "brand" | "emerald" | "amber" | "rose" | "blue" | "violet";
 }) {
   const tints: Record<string, string> = {
-    brand: "from-brand-500 to-brand-600",
-    emerald: "from-emerald-500 to-emerald-600",
-    amber: "from-amber-500 to-orange-500",
-    rose: "from-rose-500 to-pink-600",
-    blue: "from-sky-500 to-blue-600",
-    violet: "from-violet-500 to-purple-600",
+    brand: "bg-brand-50 text-brand-600",
+    emerald: "bg-emerald-50 text-emerald-600",
+    amber: "bg-amber-50 text-amber-600",
+    rose: "bg-rose-50 text-rose-600",
+    blue: "bg-sky-50 text-sky-600",
+    violet: "bg-violet-50 text-violet-600",
   };
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-card p-3.5">
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-card p-4">
       <div
         className={cx(
-          "w-9 h-9 rounded-xl bg-gradient-to-br flex items-center justify-center text-lg mb-2.5",
+          "w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-3",
           tints[tint]
         )}
       >
         {icon}
       </div>
-      <div className="text-2xl font-bold text-slate-900 leading-none">{value}</div>
-      <div className="text-xs text-slate-500 mt-1.5 font-medium">{label}</div>
+      <div className="text-3xl font-extrabold text-slate-900 leading-none tracking-tight">
+        {value}
+      </div>
+      <div className="text-[13px] text-slate-500 mt-2 font-medium">{label}</div>
     </div>
   );
 }

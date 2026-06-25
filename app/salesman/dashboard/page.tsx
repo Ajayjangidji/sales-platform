@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { StatCard, Card, Badge, Button, Thumb } from "@/components/ui";
-import { TopBar, Avatar } from "@/components/shell";
+import { BrandBar } from "@/components/shell";
 import { inr, isToday, statusColor, timeAgo } from "@/lib/format";
 
 export default function SalesmanDashboard() {
@@ -22,7 +22,7 @@ export default function SalesmanDashboard() {
 
   return (
     <div>
-      <TopBar title={`Hi, ${user?.name?.split(" ")[0] ?? "Salesman"} 👋`} subtitle="Let's take some orders" right={<Avatar emoji="🧑‍💼" name={user?.name ?? "S"} />} />
+      <BrandBar emoji="🧑‍💼" name={user?.name ?? "Salesman"} welcome={`Welcome, ${user?.name?.split(" ")[0] ?? "Salesman"}`} />
 
       <div className="px-4 py-4 space-y-5">
         <Link href="/salesman/new-order">

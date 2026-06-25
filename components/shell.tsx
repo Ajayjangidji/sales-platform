@@ -50,10 +50,43 @@ export function TopBar({
           </button>
         )}
         <div className="flex-1 min-w-0">
-          <h1 className="font-bold text-slate-900 leading-tight truncate">{title}</h1>
+          <h1 className="text-lg font-extrabold text-slate-900 leading-tight truncate tracking-tight">
+            {title}
+          </h1>
           {subtitle && <p className="text-xs text-slate-400 truncate">{subtitle}</p>}
         </div>
         {right}
+      </div>
+    </header>
+  );
+}
+
+/** Premium top header for dashboards: avatar + brand + welcome + bell. */
+export function BrandBar({
+  emoji,
+  name,
+  welcome,
+  right,
+}: {
+  emoji?: string;
+  name: string;
+  welcome: string;
+  right?: React.ReactNode;
+}) {
+  return (
+    <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-slate-100">
+      <div className="flex items-center gap-3 px-4 h-16">
+        <Avatar emoji={emoji} name={name} />
+        <div className="flex-1 min-w-0">
+          <p className="font-extrabold text-brand-700 leading-tight tracking-tight">SalesFlow</p>
+          <p className="text-xs text-slate-400 truncate">{welcome}</p>
+        </div>
+        {right}
+        <button className="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 relative">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" />
+          </svg>
+        </button>
       </div>
     </header>
   );

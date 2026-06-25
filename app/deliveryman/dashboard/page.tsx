@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { StatCard, Card, Badge, Thumb } from "@/components/ui";
-import { TopBar, Avatar } from "@/components/shell";
+import { BrandBar } from "@/components/shell";
 import { inr, isToday, statusColor } from "@/lib/format";
 
 export default function DeliverymanDashboard() {
@@ -29,11 +29,7 @@ export default function DeliverymanDashboard() {
 
   return (
     <div>
-      <TopBar
-        title={`Hi, ${user?.name?.split(" ")[0] ?? "Rider"} 🛵`}
-        subtitle="Your deliveries for today"
-        right={<Avatar emoji="🛵" name={user?.name ?? "D"} />}
-      />
+      <BrandBar emoji="🛵" name={user?.name ?? "Rider"} welcome={`Welcome, ${user?.name?.split(" ")[0] ?? "Rider"}`} />
 
       <div className="px-4 py-4 space-y-5">
         <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 text-white shadow-soft">

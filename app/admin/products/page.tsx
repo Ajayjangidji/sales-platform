@@ -77,8 +77,8 @@ export default function ProductsPage() {
   return (
     <div>
       <TopBar
-        title="Products"
-        subtitle={`${products.length} items in catalog`}
+        title="Products Catalog"
+        subtitle={`${products.length} premium items in inventory`}
         right={
           <Button size="sm" onClick={openAdd}>
             + Add

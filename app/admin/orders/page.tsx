@@ -39,7 +39,7 @@ export default function AdminOrders() {
 
   return (
     <div>
-      <TopBar title="Orders" subtitle={`${orders.length} total orders`} />
+      <TopBar title="Orders" subtitle={`${orders.length} total orders recorded`} />
       <div className="px-4 py-4 space-y-4">
         <input
           className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
