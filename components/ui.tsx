@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Icon, type IconName } from "./icons";
 
 export function cx(...c: (string | false | null | undefined)[]) {
@@ -126,11 +127,13 @@ export function StatCard({
   value,
   icon,
   tint = "brand",
+  href,
 }: {
   label: string;
   value: string | number;
   icon: React.ReactNode;
   tint?: "brand" | "emerald" | "amber" | "rose" | "blue" | "violet";
+  href?: string;
 }) {
   const tints: Record<string, string> = {
     brand: "bg-brand-50 text-brand-600",
@@ -140,8 +143,13 @@ export function StatCard({
     blue: "bg-sky-50 text-sky-600",
     violet: "bg-violet-50 text-violet-600",
   };
-  return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-card p-4">
+  const inner = (
+    <div
+      className={cx(
+        "bg-white rounded-2xl border border-slate-100 shadow-card p-4 h-full",
+        href && "transition-transform active:scale-[0.98] hover:border-brand-200"
+      )}
+    >
       <div
         className={cx(
           "w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-3",
@@ -155,6 +163,13 @@ export function StatCard({
       </div>
       <div className="text-[13px] text-slate-500 mt-2 font-medium">{label}</div>
     </div>
+  );
+  return href ? (
+    <Link href={href} className="block">
+      {inner}
+    </Link>
+  ) : (
+    inner
   );
 }
 

@@ -39,12 +39,12 @@ export default function SalesmanDashboard() {
         </Link>
 
         <div className="grid grid-cols-3 gap-3">
-          <StatCard label="Today's Orders" value={today.length} icon={<Icon name="calendar" />} tint="brand" />
-          <StatCard label="Total Orders" value={orders.length} icon={<Icon name="receipt" />} tint="violet" />
-          <StatCard label="Pending" value={pending.length} icon={<Icon name="clock" />} tint="amber" />
-          <StatCard label="Assigned" value={assigned.length} icon={<Icon name="truck" />} tint="blue" />
-          <StatCard label="Delivered" value={delivered.length} icon={<Icon name="checkCircle" />} tint="emerald" />
-          <StatCard label="Cancelled" value={cancelled.length} icon={<Icon name="x" />} tint="rose" />
+          <StatCard label="Today's Orders" value={today.length} icon={<Icon name="calendar" />} tint="brand" href="/salesman/orders" />
+          <StatCard label="Total Orders" value={orders.length} icon={<Icon name="receipt" />} tint="violet" href="/salesman/orders" />
+          <StatCard label="Pending" value={pending.length} icon={<Icon name="clock" />} tint="amber" href="/salesman/orders" />
+          <StatCard label="Assigned" value={assigned.length} icon={<Icon name="truck" />} tint="blue" href="/salesman/orders" />
+          <StatCard label="Delivered" value={delivered.length} icon={<Icon name="checkCircle" />} tint="emerald" href="/salesman/orders" />
+          <StatCard label="Cancelled" value={cancelled.length} icon={<Icon name="x" />} tint="rose" href="/salesman/orders" />
         </div>
 
         <div>

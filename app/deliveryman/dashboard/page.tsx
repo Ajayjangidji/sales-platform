@@ -49,9 +49,9 @@ export default function DeliverymanDashboard() {
         </div>
 
         <div className="grid grid-cols-3 gap-3">
-          <StatCard label="Today's Orders" value={today.length} icon={<Icon name="calendar" />} tint="brand" />
-          <StatCard label="Pending" value={pending.length} icon={<Icon name="clock" />} tint="amber" />
-          <StatCard label="On the way" value={outForDelivery.length} icon={<Icon name="truck" />} tint="blue" />
+          <StatCard label="Today's Orders" value={today.length} icon={<Icon name="calendar" />} tint="brand" href="/deliveryman/orders" />
+          <StatCard label="Pending" value={pending.length} icon={<Icon name="clock" />} tint="amber" href="/deliveryman/orders" />
+          <StatCard label="On the way" value={outForDelivery.length} icon={<Icon name="truck" />} tint="blue" href="/deliveryman/orders" />
         </div>
 
         <div>

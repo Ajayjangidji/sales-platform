@@ -59,12 +59,12 @@ export default function AdminDashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3">
-          <StatCard label="Products" value={products.length} icon={<Icon name="box" />} tint="brand" />
-          <StatCard label="Salesmen" value={salesmen.length} icon={<Icon name="users" />} tint="blue" />
-          <StatCard label="Deliverymen" value={deliverymen.length} icon={<Icon name="truck" />} tint="emerald" />
-          <StatCard label="Today's Orders" value={todayOrders.length} icon={<Icon name="receipt" />} tint="violet" />
-          <StatCard label="Pending Review" value={pending.length} icon={<Icon name="clock" />} tint="amber" />
-          <StatCard label="In Progress" value={assigned.length} icon={<Icon name="progress" />} tint="blue" />
+          <StatCard label="Products" value={products.length} icon={<Icon name="box" />} tint="brand" href="/admin/products" />
+          <StatCard label="Salesmen" value={salesmen.length} icon={<Icon name="users" />} tint="blue" href="/admin/team" />
+          <StatCard label="Deliverymen" value={deliverymen.length} icon={<Icon name="truck" />} tint="emerald" href="/admin/team" />
+          <StatCard label="Today's Orders" value={todayOrders.length} icon={<Icon name="receipt" />} tint="violet" href="/admin/orders" />
+          <StatCard label="Pending Review" value={pending.length} icon={<Icon name="clock" />} tint="amber" href="/admin/orders" />
+          <StatCard label="In Progress" value={assigned.length} icon={<Icon name="progress" />} tint="blue" href="/admin/orders" />
         </div>
 
         {/* Recent orders */}

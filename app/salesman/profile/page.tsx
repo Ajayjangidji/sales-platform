@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
-import { Card, Button, Field, Input } from "@/components/ui";
+import { Card, Button } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { TopBar, Avatar } from "@/components/shell";
 
@@ -11,24 +11,10 @@ export default function SalesmanProfile() {
   const router = useRouter();
   const user = useStore((s) => s.currentUser);
   const me = useStore((s) => s.salesmen.find((x) => x.id === user?.id));
-  const updateSalesman = useStore((s) => s.updateSalesman);
   const logout = useStore((s) => s.logout);
-
-  const [pw, setPw] = useState("");
-  const [pw2, setPw2] = useState("");
-  const [msg, setMsg] = useState("");
+  const [requested, setRequested] = useState(false);
 
   if (!me) return null;
-
-  function changePassword() {
-    setMsg("");
-    if (pw.length < 4) return setMsg("Password must be at least 4 characters.");
-    if (pw !== pw2) return setMsg("Passwords do not match.");
-    updateSalesman(me!.id, { password: pw });
-    setPw("");
-    setPw2("");
-    setMsg("Password updated.");
-  }
 
   return (
     <div>
@@ -46,23 +32,23 @@ export default function SalesmanProfile() {
           <Row label="Login ID" value={me.loginId} />
           <Row label="Mobile" value={me.mobile} />
           <Row label="Email" value={me.email || "—"} />
-          <Row label="Address" value={me.address || "—"} />
         </Card>
 
         <Card className="p-5">
-          <p className="font-bold text-slate-900 mb-4">Change Password</p>
-          <div className="space-y-4">
-            <Field label="New password">
-              <Input type="password" value={pw} onChange={(e) => setPw(e.target.value)} />
-            </Field>
-            <Field label="Confirm password">
-              <Input type="password" value={pw2} onChange={(e) => setPw2(e.target.value)} />
-            </Field>
-            {msg && <p className={`text-sm ${msg.includes("updated") ? "text-emerald-600" : "text-rose-600"}`}>{msg}</p>}
-            <Button className="w-full" onClick={changePassword}>
-              Update Password
+          <p className="font-bold text-slate-900">Change Profile Details</p>
+          <p className="text-sm text-slate-400 mt-1 mb-4">
+            To update your mobile number or email, send a request to the admin. They will
+            review and update your details.
+          </p>
+          {requested ? (
+            <div className="text-sm text-emerald-600 bg-emerald-50 rounded-xl px-3 py-2.5 flex items-center gap-2">
+              <Icon name="check" size={16} /> Request sent to admin.
+            </div>
+          ) : (
+            <Button className="w-full" onClick={() => setRequested(true)}>
+              <Icon name="refresh" size={16} /> Request Profile Change
             </Button>
-          </div>
+          )}
         </Card>
 
         <button
@@ -73,7 +59,7 @@ export default function SalesmanProfile() {
           className="w-full"
         >
           <Card className="p-4 flex items-center justify-center gap-2 text-rose-600 font-semibold">
-<Icon name="power" size={18} /> Logout
+            <Icon name="power" size={18} /> Logout
           </Card>
         </button>
       </div>

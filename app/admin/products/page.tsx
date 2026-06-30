@@ -149,12 +149,14 @@ export default function ProductsPage() {
                         <Badge className={statusColor(p.status)}>{p.status}</Badge>
                       </div>
                       <p className="text-xs text-slate-400 mt-0.5">
-                        {cat ? cat.name : "Uncategorized"} · {p.itemsPerCarton}/{p.cartonName}
+                        {p.itemsPerCarton} per {p.cartonName.toLowerCase()}
                       </p>
-                      <div className="flex items-center justify-between mt-1.5">
-                        <span className="font-bold text-brand-600">{inr(p.pricePerCarton)}</span>
+                      <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                         <span className="text-xs text-slate-500">
-                          {p.availableCartons} {p.cartonName.toLowerCase()}s left
+                          Item <span className="font-bold text-slate-700">{inr(p.pricePerItem)}</span>
+                        </span>
+                        <span className="font-bold text-brand-600">
+                          {inr(p.pricePerCarton)} / {p.cartonName.toLowerCase()}
                         </span>
                       </div>
                     </div>
