@@ -55,6 +55,8 @@ export function statusColor(status: string): string {
     Cancelled: "bg-rose-100 text-rose-700",
     "Delivery Failed": "bg-rose-100 text-rose-700",
     Paid: "bg-emerald-100 text-emerald-700",
+    Partial: "bg-amber-100 text-amber-700",
+    Credit: "bg-orange-100 text-orange-700",
     Unpaid: "bg-slate-100 text-slate-600",
     Failed: "bg-rose-100 text-rose-700",
     Active: "bg-emerald-100 text-emerald-700",

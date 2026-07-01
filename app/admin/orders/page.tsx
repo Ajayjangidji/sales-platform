@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
-import { Card, Badge, cx, EmptyState, Thumb } from "@/components/ui";
+import { Card, Badge, cx, EmptyState, Thumb, Select } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { TopBar } from "@/components/shell";
 import { inr, statusColor, timeAgo, isToday } from "@/lib/format";
@@ -20,8 +20,15 @@ const filters = [
 
 export default function AdminOrders() {
   const orders = useStore((s) => s.orders);
+  const salesmen = useStore((s) => s.salesmen);
+  const zones = useStore((s) => s.zones);
   const [filter, setFilter] = useState<string>("All");
   const [search, setSearch] = useState("");
+  const [salesmanId, setSalesmanId] = useState("");
+  const [zone, setZone] = useState("");
+
+  const zoneObj = zones.find((z) => z.name === zone);
+  const [area, setArea] = useState("");
 
   const list = useMemo(() => {
     return orders
@@ -30,13 +37,16 @@ export default function AdminOrders() {
         if (filter === "Today") return isToday(o.createdAt);
         return o.status === filter;
       })
+      .filter((o) => !salesmanId || o.salesmanId === salesmanId)
+      .filter((o) => !zone || o.zone === zone)
+      .filter((o) => !area || o.area === area)
       .filter(
         (o) =>
           o.shopName.toLowerCase().includes(search.toLowerCase()) ||
           o.orderNo.toLowerCase().includes(search.toLowerCase())
       )
       .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
-  }, [orders, filter, search]);
+  }, [orders, filter, search, salesmanId, zone, area]);
 
   return (
     <div>
@@ -48,6 +58,26 @@ export default function AdminOrders() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <div className="grid grid-cols-3 gap-2">
+          <Select value={salesmanId} onChange={(e) => setSalesmanId(e.target.value)}>
+            <option value="">All salesmen</option>
+            {salesmen.map((s) => (
+              <option key={s.id} value={s.id}>{s.fullName}</option>
+            ))}
+          </Select>
+          <Select value={zone} onChange={(e) => { setZone(e.target.value); setArea(""); }}>
+            <option value="">All zones</option>
+            {zones.map((z) => (
+              <option key={z.id} value={z.name}>{z.name}</option>
+            ))}
+          </Select>
+          <Select value={area} onChange={(e) => setArea(e.target.value)} disabled={!zoneObj}>
+            <option value="">All areas</option>
+            {zoneObj?.areas.map((a) => (
+              <option key={a} value={a}>{a}</option>
+            ))}
+          </Select>
+        </div>
         <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
           {filters.map((f) => (
             <button

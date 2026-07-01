@@ -33,7 +33,7 @@ export function OrderDetailView({ order }: { order: Order }) {
           </p>
           {order.location.mapsLink && (
             <a href={order.location.mapsLink} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-brand-600 font-medium">
-              <Icon name="map" size={15} /> Open in Maps
+              <Icon name="map" size={15} /> Get Direction
             </a>
           )}
         </div>

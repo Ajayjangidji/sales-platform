@@ -424,19 +424,6 @@ function ProductForm({
         <Field label="Product name" required>
           <Input value={form.name} onChange={(e) => set({ name: e.target.value })} placeholder="e.g. Mineral Water 1L" />
         </Field>
-        <Field label="Category">
-          <Select
-            value={form.categoryId ?? ""}
-            onChange={(e) => set({ categoryId: e.target.value || null })}
-          >
-            <option value="">Uncategorized</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </Select>
-        </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Packaging type" hint="Box / Carton / Crate">
             <Input value={form.cartonName} onChange={(e) => set({ cartonName: e.target.value })} />
@@ -468,19 +455,6 @@ function ProductForm({
             />
           </Field>
         </div>
-        <Field label="Available stock (packs)">
-          <Input
-            type="number"
-            value={form.availableCartons}
-            onChange={(e) => set({ availableCartons: +e.target.value })}
-          />
-        </Field>
-        <Field label="Delivery location">
-          <Input
-            value={form.deliveryLocation}
-            onChange={(e) => set({ deliveryLocation: e.target.value })}
-          />
-        </Field>
         <Field label="Description">
           <Textarea value={form.description} onChange={(e) => set({ description: e.target.value })} />
         </Field>

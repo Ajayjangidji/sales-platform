@@ -8,6 +8,9 @@ import { createPool, type VercelPool } from "@vercel/postgres";
 
 export interface Collections {
   categories: any[];
+  businessCategories: any[];
+  zones: any[];
+  shops: any[];
   products: any[];
   salesmen: any[];
   deliverymen: any[];
@@ -18,6 +21,9 @@ export interface Collections {
 
 const DEFAULTS: Record<string, any> = {
   categories: [],
+  businessCategories: [],
+  zones: [],
+  shops: [],
   products: [],
   salesmen: [],
   deliverymen: [],
@@ -81,6 +87,9 @@ export async function readAll(): Promise<Collections> {
   for (const r of rows) map[r.key] = r.value;
   return {
     categories: map.categories ?? [],
+    businessCategories: map.businessCategories ?? [],
+    zones: map.zones ?? [],
+    shops: map.shops ?? [],
     products: map.products ?? [],
     salesmen: map.salesmen ?? [],
     deliverymen: map.deliverymen ?? [],

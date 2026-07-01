@@ -4,6 +4,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type {
   Category,
+  BusinessCategory,
+  Zone,
+  Shop,
   Product,
   Salesman,
   Deliveryman,
@@ -12,6 +15,7 @@ import type {
   CurrentUser,
   OrderStatus,
   PaymentMode,
+  PaymentSplit,
 } from "./types";
 
 export const ADMIN_CREDENTIALS = { loginId: "admin", password: "Harsh@3321" };
@@ -37,6 +41,9 @@ interface AppState {
   currentUser: CurrentUser | null;
 
   categories: Category[];
+  businessCategories: BusinessCategory[];
+  zones: Zone[];
+  shops: Shop[];
   products: Product[];
   salesmen: Salesman[];
   deliverymen: Deliveryman[];
@@ -52,6 +59,18 @@ interface AppState {
 
   addCategory: (name: string) => void;
   deleteCategory: (id: string) => void;
+
+  addBusinessCategory: (name: string) => void;
+  deleteBusinessCategory: (id: string) => void;
+
+  addZone: (name: string) => void;
+  deleteZone: (id: string) => void;
+  addAreaToZone: (zoneId: string, area: string) => void;
+  removeAreaFromZone: (zoneId: string, area: string) => void;
+
+  addShop: (s: Omit<Shop, "id" | "createdAt">) => Shop;
+  updateShop: (id: string, s: Partial<Shop>) => void;
+  deleteShop: (id: string) => void;
 
   addProduct: (p: Omit<Product, "id" | "createdAt">) => void;
   updateProduct: (id: string, p: Partial<Product>) => void;
@@ -84,6 +103,7 @@ interface AppState {
     data: {
       paymentMode: PaymentMode;
       amountReceived: number;
+      split?: PaymentSplit;
       transactionId?: string;
       paymentScreenshot?: string;
       paymentNote?: string;
@@ -107,6 +127,9 @@ export const useStore = create<AppState>()(
       currentUser: null,
 
       categories: [],
+      businessCategories: [],
+      zones: [],
+      shops: [],
       products: [],
       salesmen: [],
       deliverymen: [],
@@ -123,6 +146,9 @@ export const useStore = create<AppState>()(
           const d = await res.json();
           set({
             categories: d.categories ?? [],
+            businessCategories: d.businessCategories ?? [],
+            zones: d.zones ?? [],
+            shops: d.shops ?? [],
             products: d.products ?? [],
             salesmen: d.salesmen ?? [],
             deliverymen: d.deliverymen ?? [],
@@ -183,6 +209,60 @@ export const useStore = create<AppState>()(
         set((s) => ({ categories: s.categories.filter((c) => c.id !== id), products: updatedProducts }));
         persistOp("categories", "delete", { id });
         persistOp("products", "replaceAll", { items: updatedProducts });
+      },
+
+      // ---- business categories (shop types) ----
+      addBusinessCategory: (name) => {
+        const bc: BusinessCategory = { id: uid("bcat"), name: name.trim(), createdAt: new Date().toISOString() };
+        set((s) => ({ businessCategories: [...s.businessCategories, bc] }));
+        persistOp("businessCategories", "insert", bc);
+      },
+      deleteBusinessCategory: (id) => {
+        set((s) => ({ businessCategories: s.businessCategories.filter((c) => c.id !== id) }));
+        persistOp("businessCategories", "delete", { id });
+      },
+
+      // ---- zones & areas ----
+      addZone: (name) => {
+        const z: Zone = { id: uid("zone"), name: name.trim(), areas: [], createdAt: new Date().toISOString() };
+        set((s) => ({ zones: [...s.zones, z] }));
+        persistOp("zones", "insert", z);
+      },
+      deleteZone: (id) => {
+        set((s) => ({ zones: s.zones.filter((z) => z.id !== id) }));
+        persistOp("zones", "delete", { id });
+      },
+      addAreaToZone: (zoneId, area) => {
+        const a = area.trim();
+        if (!a) return;
+        const zone = get().zones.find((z) => z.id === zoneId);
+        if (!zone || zone.areas.includes(a)) return;
+        const patch = { areas: [...zone.areas, a] };
+        set((s) => ({ zones: s.zones.map((z) => (z.id === zoneId ? { ...z, ...patch } : z)) }));
+        persistOp("zones", "update", { id: zoneId, patch });
+      },
+      removeAreaFromZone: (zoneId, area) => {
+        const zone = get().zones.find((z) => z.id === zoneId);
+        if (!zone) return;
+        const patch = { areas: zone.areas.filter((x) => x !== area) };
+        set((s) => ({ zones: s.zones.map((z) => (z.id === zoneId ? { ...z, ...patch } : z)) }));
+        persistOp("zones", "update", { id: zoneId, patch });
+      },
+
+      // ---- shops ----
+      addShop: (shop) => {
+        const record: Shop = { ...shop, id: uid("shop"), createdAt: new Date().toISOString() };
+        set((s) => ({ shops: [record, ...s.shops] }));
+        persistOp("shops", "insert", record);
+        return record;
+      },
+      updateShop: (id, patch) => {
+        set((s) => ({ shops: s.shops.map((x) => (x.id === id ? { ...x, ...patch } : x)) }));
+        persistOp("shops", "update", { id, patch });
+      },
+      deleteShop: (id) => {
+        set((s) => ({ shops: s.shops.filter((x) => x.id !== id) }));
+        persistOp("shops", "delete", { id });
       },
 
       // ---- products ----
@@ -325,14 +405,19 @@ export const useStore = create<AppState>()(
         if (updated) persistOp("orders", "update", { id, patch: updated });
       },
       recordPayment: (orderId, data) => {
+        const order = get().orders.find((o) => o.id === orderId);
+        const credit = data.split?.credit ?? 0;
+        // If any amount is on credit, the order is only partially paid.
+        const paymentStatus = credit > 0 ? "Partial" : "Paid";
         set((s) => ({
           orders: s.orders.map((o) =>
             o.id === orderId
               ? pushHistory(
                   {
                     ...o,
-                    paymentStatus: "Paid",
+                    paymentStatus,
                     paymentMode: data.paymentMode,
+                    split: data.split,
                     amountReceived: data.amountReceived,
                     transactionId: data.transactionId,
                     paymentScreenshot: data.paymentScreenshot,
@@ -341,11 +426,12 @@ export const useStore = create<AppState>()(
                     deliveredAt: new Date().toISOString(),
                     status: "Completed",
                   },
-                  "Payment Completed"
+                  credit > 0 ? "Delivered (Credit pending)" : "Payment Completed"
                 )
               : o
           ),
         }));
+        void order;
         const updated = get().orders.find((o) => o.id === orderId);
         if (updated) persistOp("orders", "update", { id: orderId, patch: updated });
       },

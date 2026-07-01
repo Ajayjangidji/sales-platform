@@ -12,12 +12,48 @@ export type OrderStatus =
   | "Cancelled"
   | "Delivery Failed";
 
-export type PaymentStatus = "Unpaid" | "Paid" | "Failed";
-export type PaymentMode = "Cash" | "Online" | null;
+export type PaymentStatus = "Unpaid" | "Paid" | "Partial" | "Failed";
+export type PaymentMode = "Cash" | "Online" | "Credit" | "Split" | null;
 
 export interface Category {
   id: string;
   name: string;
+  createdAt: string;
+}
+
+/** Shop type, e.g. Kirana / Hardware / Clinic / Trading company. */
+export interface BusinessCategory {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
+/** A delivery zone containing multiple areas. */
+export interface Zone {
+  id: string;
+  name: string;
+  areas: string[];
+  createdAt: string;
+}
+
+/** A split of a payment across modes. */
+export interface PaymentSplit {
+  cash: number;
+  online: number;
+  credit: number;
+}
+
+/** A shop/customer record, unique by mobile number. */
+export interface Shop {
+  id: string;
+  name: string;
+  ownerName: string;
+  mobile: string;
+  photo: string;
+  zone: string;
+  area: string;
+  businessCategoryId: string | null;
+  location: ShopLocation;
   createdAt: string;
 }
 
@@ -47,6 +83,8 @@ export interface Salesman {
   loginId: string;
   password: string;
   area: string;
+  /** Zone ids assigned to this salesman, or ["all"] for all zones. */
+  zones?: string[];
   status: "Active" | "Inactive";
   createdAt: string;
 }
@@ -91,6 +129,10 @@ export interface Order {
   shopContactName: string;
   shopMobile: string;
   shopPhoto: string;
+  shopId?: string;
+  zone?: string;
+  area?: string;
+  businessCategoryId?: string | null;
   location: ShopLocation;
   salesmanId: string;
   salesmanName: string;
@@ -101,6 +143,8 @@ export interface Order {
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   paymentMode: PaymentMode;
+  /** Split of the collected amount across Cash / Online / Credit. */
+  split?: PaymentSplit;
   amountReceived?: number;
   transactionId?: string;
   paymentScreenshot?: string;

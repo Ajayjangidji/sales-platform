@@ -102,7 +102,8 @@ export type NavIconKey =
   | "plus"
   | "profile"
   | "deliveries"
-  | "history";
+  | "history"
+  | "shops";
 
 export interface NavItem {
   href: string;
@@ -185,6 +186,12 @@ function NavIcon({ name, active }: { name: NavIconKey; active: boolean }) {
         <svg {...p}>
           <circle cx="12" cy="12" r="9" />
           <path d="M12 7v5l3.5 2" />
+        </svg>
+      );
+    case "shops":
+      return (
+        <svg {...p}>
+          <path d="M4 9l1-5h14l1 5M4 9v11h16V9M4 9h16M9 20v-5h6v5" />
         </svg>
       );
   }

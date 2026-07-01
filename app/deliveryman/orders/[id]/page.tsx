@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import type { PaymentMode } from "@/lib/types";
 import { Card, Badge, Button, Modal, Field, Input, Textarea, EmptyState, cx, Thumb } from "@/components/ui";
-import { Icon } from "@/components/icons";
+import { Icon, type IconName } from "@/components/icons";
 import { TopBar, fileToDataUrl } from "@/components/shell";
 import { inr, statusColor, formatDateTime } from "@/lib/format";
 
@@ -17,8 +17,9 @@ export default function DeliveryOrderDetail() {
   const recordPayment = useStore((s) => s.recordPayment);
 
   const [payOpen, setPayOpen] = useState(false);
-  const [mode, setMode] = useState<PaymentMode>(null);
-  const [received, setReceived] = useState("");
+  const [cashAmt, setCashAmt] = useState("");
+  const [onlineAmt, setOnlineAmt] = useState("");
+  const [creditAmt, setCreditAmt] = useState("");
   const [txn, setTxn] = useState("");
   const [note, setNote] = useState("");
   const [screenshot, setScreenshot] = useState("");
@@ -36,9 +37,16 @@ export default function DeliveryOrderDetail() {
   const done = ["Completed", "Delivered"].includes(order.status);
   const allChecked = order.items.every((_, i) => checked[i]);
 
+  const cash = Number(cashAmt) || 0;
+  const online = Number(onlineAmt) || 0;
+  const credit = Number(creditAmt) || 0;
+  const splitTotal = cash + online + credit;
+  const totalOk = splitTotal === order.totalAmount;
+
   function openPayment() {
-    setReceived(String(order!.totalAmount));
-    setMode(null);
+    setCashAmt(String(order!.totalAmount));
+    setOnlineAmt("");
+    setCreditAmt("");
     setTxn("");
     setNote("");
     setScreenshot("");
@@ -46,12 +54,16 @@ export default function DeliveryOrderDetail() {
   }
 
   function confirmPayment() {
-    if (!mode) return;
+    if (!totalOk) return;
+    const modes = [cash > 0 ? "Cash" : "", online > 0 ? "Online" : "", credit > 0 ? "Credit" : ""].filter(Boolean);
+    const paymentMode: PaymentMode =
+      modes.length > 1 ? "Split" : (modes[0] as PaymentMode) || "Cash";
     recordPayment(order!.id, {
-      paymentMode: mode,
-      amountReceived: Number(received) || order!.totalAmount,
-      transactionId: mode === "Online" ? txn : undefined,
-      paymentScreenshot: mode === "Online" ? screenshot : undefined,
+      paymentMode,
+      amountReceived: cash + online,
+      split: { cash, online, credit },
+      transactionId: online > 0 ? txn : undefined,
+      paymentScreenshot: online > 0 ? screenshot : undefined,
       paymentNote: note,
     });
     setPayOpen(false);
@@ -150,9 +162,19 @@ export default function DeliveryOrderDetail() {
                 <Icon name="checkCircle" size={28} />
               </div>
               <p className="font-bold text-emerald-700">Delivery Completed</p>
-              <p className="text-sm text-emerald-600">
-                {inr(order.amountReceived ?? order.totalAmount)} collected via {order.paymentMode}
-              </p>
+              {order.split ? (
+                <div className="text-sm text-emerald-700 mt-1 flex flex-wrap justify-center gap-x-3 gap-y-0.5">
+                  {order.split.cash > 0 && <span>Cash {inr(order.split.cash)}</span>}
+                  {order.split.online > 0 && <span>Online {inr(order.split.online)}</span>}
+                  {order.split.credit > 0 && (
+                    <span className="text-orange-600 font-semibold">Credit {inr(order.split.credit)}</span>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-emerald-600">
+                  {inr(order.amountReceived ?? order.totalAmount)} collected via {order.paymentMode}
+                </p>
+              )}
               {order.transactionId && (
                 <p className="text-xs text-emerald-600 mt-1">Txn: {order.transactionId}</p>
               )}
@@ -209,64 +231,47 @@ export default function DeliveryOrderDetail() {
             <Button variant="outline" className="flex-1" onClick={() => setPayOpen(false)}>
               Cancel
             </Button>
-            <Button className="flex-1" disabled={!mode} onClick={confirmPayment}>
-              <Icon name="check" size={16} /> Confirm & Complete
+            <Button className="flex-1" disabled={!totalOk} onClick={confirmPayment}>
+              <Icon name="check" size={16} /> Confirm &amp; Complete
             </Button>
           </>
         }
       >
         <div className="space-y-4">
           <div className="bg-brand-50 rounded-xl p-3 text-center">
-            <p className="text-xs text-brand-600">Amount to collect</p>
+            <p className="text-xs text-brand-600">Total amount</p>
             <p className="text-2xl font-extrabold text-brand-700">{inr(order.totalAmount)}</p>
           </div>
 
-          {/* Mode selector */}
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => setMode("Cash")}
-              className={cx(
-                "p-4 rounded-2xl border-2 text-center transition",
-                mode === "Cash" ? "border-emerald-500 bg-emerald-50" : "border-slate-200"
-              )}
-            >
-              <div className="flex justify-center mb-1.5 text-slate-700"><Icon name="cash" size={28} /></div>
-              <p className="font-semibold text-slate-800">Cash</p>
-            </button>
-            <button
-              onClick={() => setMode("Online")}
-              className={cx(
-                "p-4 rounded-2xl border-2 text-center transition",
-                mode === "Online" ? "border-brand-500 bg-brand-50" : "border-slate-200"
-              )}
-            >
-              <div className="flex justify-center mb-1.5 text-slate-700"><Icon name="online" size={28} /></div>
-              <p className="font-semibold text-slate-800">Online</p>
-            </button>
+          <p className="text-sm text-slate-500">
+            Split the amount across Cash, Online and Credit. The three must add up to the total.
+          </p>
+
+          {/* Split inputs */}
+          <div className="space-y-2.5">
+            <SplitRow icon="cash" label="Cash" tint="text-emerald-600" value={cashAmt} onChange={setCashAmt} />
+            <SplitRow icon="online" label="Online" tint="text-brand-600" value={onlineAmt} onChange={setOnlineAmt} />
+            <SplitRow icon="clock" label="Credit (unpaid)" tint="text-orange-600" value={creditAmt} onChange={setCreditAmt} />
           </div>
 
-          {mode === "Cash" && (
-            <div className="space-y-3 animate-fade-in">
-              <Field label="Amount received">
-                <Input type="number" value={received} onChange={(e) => setReceived(e.target.value)} />
-              </Field>
-              {Number(received) < order.totalAmount && (
-                <p className="text-xs text-amber-600">
-                  Balance due: {inr(order.totalAmount - Number(received))}
-                </p>
-              )}
-              <Field label="Note (optional)">
-                <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Any remark…" />
-              </Field>
-            </div>
-          )}
+          <div
+            className={cx(
+              "rounded-xl px-3 py-2.5 text-sm flex items-center justify-between",
+              totalOk ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
+            )}
+          >
+            <span>Entered: {inr(splitTotal)}</span>
+            <span className="font-semibold">
+              {totalOk ? "Matches total ✓" : `Need ${inr(order.totalAmount - splitTotal)} more`}
+            </span>
+          </div>
 
-          {mode === "Online" && (
-            <div className="space-y-3 animate-fade-in">
+          {online > 0 && (
+            <div className="space-y-3 animate-fade-in border-t border-slate-100 pt-3">
               {qr.status === "Active" ? (
                 <div className="text-center">
                   <p className="text-sm text-slate-500 mb-2">Ask the shop to scan this QR:</p>
-                  <div className="w-44 h-44 mx-auto rounded-2xl border-2 border-slate-200 bg-white flex items-center justify-center overflow-hidden">
+                  <div className="w-40 h-40 mx-auto rounded-2xl border-2 border-slate-200 bg-white flex items-center justify-center overflow-hidden">
                     {qr.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={qr.image} alt="QR" className="w-full h-full object-contain" />
@@ -300,8 +305,45 @@ export default function DeliveryOrderDetail() {
               </label>
             </div>
           )}
+
+          <Field label="Note (optional)">
+            <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Any remark…" />
+          </Field>
         </div>
       </Modal>
+    </div>
+  );
+}
+
+function SplitRow({
+  icon,
+  label,
+  tint,
+  value,
+  onChange,
+}: {
+  icon: IconName;
+  label: string;
+  tint: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex items-center gap-3 bg-slate-50 rounded-xl px-3 py-2">
+      <span className={cx("shrink-0", tint)}>
+        <Icon name={icon} size={20} />
+      </span>
+      <span className="text-sm font-medium text-slate-700 flex-1">{label}</span>
+      <div className="flex items-center gap-1">
+        <span className="text-slate-400 text-sm">₹</span>
+        <input
+          type="number"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="0"
+          className="w-24 text-right rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-brand-400"
+        />
+      </div>
     </div>
   );
 }

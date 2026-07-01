@@ -16,12 +16,9 @@ export default function AdminDashboard() {
     ["Deliveryman Assigned", "Accepted by Deliveryman", "Out for Delivery", "Reached at Shop"].includes(o.status)
   );
   const delivered = orders.filter((o) => ["Delivered", "Completed"].includes(o.status));
-  const cash = orders
-    .filter((o) => o.paymentMode === "Cash" && o.paymentStatus === "Paid")
-    .reduce((s, o) => s + (o.amountReceived ?? o.totalAmount), 0);
-  const online = orders
-    .filter((o) => o.paymentMode === "Online" && o.paymentStatus === "Paid")
-    .reduce((s, o) => s + (o.amountReceived ?? o.totalAmount), 0);
+  const cashTotal = orders.reduce((s, o) => s + (o.split?.cash ?? 0), 0);
+  const onlineTotal = orders.reduce((s, o) => s + (o.split?.online ?? 0), 0);
+  const creditTotal = orders.reduce((s, o) => s + (o.split?.credit ?? 0), 0);
 
   const recent = [...orders]
     .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
@@ -40,19 +37,27 @@ export default function AdminDashboard() {
           <p className="text-[11px] font-semibold tracking-[0.15em] text-brand-100">
             TOTAL COLLECTION
           </p>
-          <p className="font-display text-4xl font-extrabold mt-2 tracking-tight">{inr(cash + online)}</p>
-          <div className="flex gap-3 mt-4">
-            <div className="flex-1 bg-white/15 rounded-2xl px-3.5 py-2.5">
-              <p className="text-[11px] text-brand-100 flex items-center gap-1.5">
-                <Icon name="cash" size={14} /> Cash
+          <p className="font-display text-4xl font-extrabold mt-2 tracking-tight">
+            {inr(cashTotal + onlineTotal)}
+          </p>
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            <div className="bg-white/15 rounded-2xl px-3 py-2.5">
+              <p className="text-[11px] text-brand-100 flex items-center gap-1">
+                <Icon name="cash" size={13} /> Cash
               </p>
-              <p className="font-bold text-lg">{inr(cash)}</p>
+              <p className="font-bold">{inr(cashTotal)}</p>
             </div>
-            <div className="flex-1 bg-white/15 rounded-2xl px-3.5 py-2.5">
-              <p className="text-[11px] text-brand-100 flex items-center gap-1.5">
-                <Icon name="online" size={14} /> Online
+            <div className="bg-white/15 rounded-2xl px-3 py-2.5">
+              <p className="text-[11px] text-brand-100 flex items-center gap-1">
+                <Icon name="online" size={13} /> Online
               </p>
-              <p className="font-bold text-lg">{inr(online)}</p>
+              <p className="font-bold">{inr(onlineTotal)}</p>
+            </div>
+            <div className="bg-white/15 rounded-2xl px-3 py-2.5">
+              <p className="text-[11px] text-brand-100 flex items-center gap-1">
+                <Icon name="clock" size={13} /> Credit
+              </p>
+              <p className="font-bold">{inr(creditTotal)}</p>
             </div>
           </div>
         </div>

@@ -223,11 +223,12 @@ const blankPerson = {
   mobile: "",
   email: "",
   address: "",
-  photo: "🧑",
+  photo: "",
   vehicle: "",
   loginId: "",
   password: "",
   area: "",
+  zones: [] as string[],
   status: "Active" as "Active" | "Inactive",
 };
 
@@ -293,6 +294,7 @@ function PersonForm({
         loginId: form.loginId,
         password: form.password,
         area: form.area,
+        zones: form.zones,
         status: form.status,
       };
       if (initial) store.updateSalesman(initial.id, data);
@@ -336,7 +338,7 @@ function PersonForm({
     >
       <div className="space-y-4">
         <div className="flex items-center gap-4">
-          <PhotoPicker value={form.photo} onChange={(v) => set({ photo: v })} fallback="🧑" />
+          <PhotoPicker value={form.photo} onChange={(v) => set({ photo: v })} />
           <p className="text-xs text-slate-400">Profile photo (optional).</p>
         </div>
         <Field label="Full name" required>
@@ -389,6 +391,56 @@ function PersonForm({
             )}
           </Field>
         </div>
+        {kind === "salesman" && (
+          <div>
+            <p className="text-sm font-semibold text-slate-700 mb-2">Assigned zones</p>
+            <div className="space-y-1.5">
+              <label className="flex items-center gap-2.5 bg-slate-50 rounded-xl px-3 py-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 accent-brand-600"
+                  checked={form.zones.includes("all")}
+                  onChange={(e) => set({ zones: e.target.checked ? ["all"] : [] })}
+                />
+                <span className="text-sm font-semibold text-slate-700">All Zones</span>
+              </label>
+              {store.zones.map((z) => {
+                const checked = form.zones.includes(z.id);
+                const disabled = form.zones.includes("all");
+                return (
+                  <label
+                    key={z.id}
+                    className={cx(
+                      "flex items-center gap-2.5 rounded-xl px-3 py-2.5 cursor-pointer",
+                      disabled ? "opacity-40" : "bg-white border border-slate-100"
+                    )}
+                  >
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 accent-brand-600"
+                      checked={checked}
+                      disabled={disabled}
+                      onChange={(e) =>
+                        set({
+                          zones: e.target.checked
+                            ? [...form.zones.filter((x) => x !== "all"), z.id]
+                            : form.zones.filter((x) => x !== z.id),
+                        })
+                      }
+                    />
+                    <span className="text-sm text-slate-700 flex-1">{z.name}</span>
+                    <span className="text-xs text-slate-400">{z.areas.length} areas</span>
+                  </label>
+                );
+              })}
+              {store.zones.length === 0 && (
+                <p className="text-xs text-slate-400 px-1">
+                  No zones yet — add them in Settings → Zones &amp; Areas.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
         <Field label="Email (optional)">
           <Input value={form.email} onChange={(e) => set({ email: e.target.value })} inputMode="email" />
         </Field>

@@ -1,28 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import type { OrderItem, ShopLocation } from "@/lib/types";
-import { Button, Card, Field, Input, Textarea, cx, EmptyState } from "@/components/ui";
+import { Button, Card, Field, Input, Select, cx, EmptyState } from "@/components/ui";
 import { TopBar, PhotoPicker } from "@/components/shell";
 import { Icon } from "@/components/icons";
 import { inr } from "@/lib/format";
 
-const steps = ["Shop", "Location", "Products", "Delivery", "Review"];
+const steps = ["Shop", "Location", "Products", "Review"];
 
 export default function NewOrderPage() {
   const router = useRouter();
   const store = useStore();
   const user = store.currentUser;
+  const me = store.salesmen.find((s) => s.id === user?.id);
+
+  // Zones this salesman may use.
+  const availableZones = useMemo(() => {
+    const z = me?.zones ?? [];
+    if (z.length === 0 || z.includes("all")) return store.zones;
+    return store.zones.filter((x) => z.includes(x.id));
+  }, [me, store.zones]);
 
   const [step, setStep] = useState(0);
   const [shop, setShop] = useState({
     shopName: "",
-    shopContactName: "",
+    ownerName: "",
     shopMobile: "",
     shopPhoto: "",
-    address: "",
+    businessCategoryId: "",
+    zone: "",
+    area: "",
   });
   const [loc, setLoc] = useState<ShopLocation>({
     latitude: null,
@@ -32,23 +42,24 @@ export default function NewOrderPage() {
   });
   const [locating, setLocating] = useState(false);
   const [cart, setCart] = useState<Record<string, number>>({});
-  const [deliverymanId, setDeliverymanId] = useState("");
+  const [rates, setRates] = useState<Record<string, number>>({});
 
   const activeProducts = store.products.filter((p) => p.status === "Active");
-  const activeDeliverymen = store.deliverymen.filter((d) => d.status === "Active");
+  const selectedZone = store.zones.find((z) => z.name === shop.zone);
 
   const items: OrderItem[] = Object.entries(cart)
     .filter(([, qty]) => qty > 0)
     .map(([pid, qty]) => {
       const p = store.products.find((x) => x.id === pid)!;
+      const rate = rates[pid] ?? p.pricePerCarton;
       return {
         productId: pid,
         productName: p.name,
         cartonName: p.cartonName,
         itemsPerCarton: p.itemsPerCarton,
         cartons: qty,
-        pricePerCarton: p.pricePerCarton,
-        lineTotal: qty * p.pricePerCarton,
+        pricePerCarton: rate,
+        lineTotal: qty * rate,
       };
     });
   const total = items.reduce((s, it) => s + it.lineTotal, 0);
@@ -57,7 +68,7 @@ export default function NewOrderPage() {
     setLocating(true);
     if (!navigator.geolocation) {
       setLocating(false);
-      alert("GPS not available. Please enter address manually.");
+      alert("GPS not available. Please try again outdoors.");
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -68,41 +79,60 @@ export default function NewOrderPage() {
           latitude,
           longitude,
           mapsLink: `https://www.google.com/maps?q=${latitude},${longitude}`,
-          address: l.address || shop.address,
         }));
         setLocating(false);
       },
       () => {
         setLocating(false);
-        alert("Could not get GPS location. Please enter the address manually.");
+        alert("Could not get GPS location. Please allow location permission.");
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   }
 
   function canNext(): boolean {
-    if (step === 0) return shop.shopName.trim() !== "" && shop.shopMobile.trim() !== "";
-    if (step === 1) return loc.address.trim() !== "" || (loc.latitude !== null);
+    if (step === 0)
+      return shop.shopName.trim() !== "" && shop.shopMobile.trim() !== "";
+    if (step === 1) return loc.latitude !== null;
     if (step === 2) return items.length > 0;
-    if (step === 3) return deliverymanId !== "";
     return true;
   }
 
   function submit() {
-    const dm = store.deliverymen.find((d) => d.id === deliverymanId);
+    // Save / update the shop record (unique by mobile).
+    const existing = store.shops.find((s) => s.mobile === shop.shopMobile.trim());
+    const shopData = {
+      name: shop.shopName,
+      ownerName: shop.ownerName,
+      mobile: shop.shopMobile,
+      photo: shop.shopPhoto,
+      zone: shop.zone,
+      area: shop.area,
+      businessCategoryId: shop.businessCategoryId || null,
+      location: loc,
+    };
+    let shopId: string;
+    if (existing) {
+      store.updateShop(existing.id, shopData);
+      shopId = existing.id;
+    } else {
+      shopId = store.addShop(shopData).id;
+    }
+
     const order = store.createOrder({
       shopName: shop.shopName,
-      shopContactName: shop.shopContactName,
+      shopContactName: shop.ownerName,
       shopMobile: shop.shopMobile,
       shopPhoto: shop.shopPhoto,
-      location: {
-        ...loc,
-        address: loc.address || shop.address,
-      },
+      shopId,
+      zone: shop.zone,
+      area: shop.area,
+      businessCategoryId: shop.businessCategoryId || null,
+      location: loc,
       salesmanId: user!.id,
       salesmanName: user!.name,
-      deliverymanId,
-      deliverymanName: dm?.fullName ?? "",
+      deliverymanId: "",
+      deliverymanName: "",
       items,
       totalAmount: total,
     });
@@ -143,15 +173,48 @@ export default function NewOrderPage() {
             <Field label="Shop name" required>
               <Input value={shop.shopName} onChange={(e) => setShop({ ...shop, shopName: e.target.value })} placeholder="e.g. Sharma General Store" />
             </Field>
-            <Field label="Owner / contact person">
-              <Input value={shop.shopContactName} onChange={(e) => setShop({ ...shop, shopContactName: e.target.value })} />
+            <Field label="Owner name">
+              <Input value={shop.ownerName} onChange={(e) => setShop({ ...shop, ownerName: e.target.value })} />
             </Field>
-            <Field label="Mobile number" required>
+            <Field label="Owner mobile number" required>
               <Input value={shop.shopMobile} onChange={(e) => setShop({ ...shop, shopMobile: e.target.value })} inputMode="tel" placeholder="10-digit number" />
             </Field>
-            <Field label="Shop address">
-              <Textarea value={shop.address} onChange={(e) => setShop({ ...shop, address: e.target.value })} placeholder="Street, area, city" />
+            <Field label="Business category">
+              <Select
+                value={shop.businessCategoryId}
+                onChange={(e) => setShop({ ...shop, businessCategoryId: e.target.value })}
+              >
+                <option value="">Select type…</option>
+                {store.businessCategories.map((b) => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </Select>
             </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Zone">
+                <Select
+                  value={shop.zone}
+                  onChange={(e) => setShop({ ...shop, zone: e.target.value, area: "" })}
+                >
+                  <option value="">Select zone…</option>
+                  {availableZones.map((z) => (
+                    <option key={z.id} value={z.name}>{z.name}</option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Area">
+                <Select
+                  value={shop.area}
+                  onChange={(e) => setShop({ ...shop, area: e.target.value })}
+                  disabled={!selectedZone}
+                >
+                  <option value="">Select area…</option>
+                  {selectedZone?.areas.map((a) => (
+                    <option key={a} value={a}>{a}</option>
+                  ))}
+                </Select>
+              </Field>
+            </div>
           </div>
         )}
 
@@ -177,15 +240,11 @@ export default function NewOrderPage() {
                     Lat: {loc.latitude.toFixed(5)}, Lng: {loc.longitude?.toFixed(5)}
                   </p>
                   <a href={loc.mapsLink} target="_blank" rel="noreferrer" className="text-brand-600 text-xs font-medium inline-flex items-center gap-1 mt-1">
-                    <Icon name="map" size={13} /> Preview on Maps
+                    <Icon name="map" size={13} /> Get Direction
                   </a>
                 </div>
               )}
             </Card>
-            <p className="text-center text-xs text-slate-400">— or enter manually —</p>
-            <Field label="Full address" hint="Used if GPS permission is denied.">
-              <Textarea value={loc.address} onChange={(e) => setLoc({ ...loc, address: e.target.value })} placeholder={shop.address || "Enter shop address"} />
-            </Field>
           </div>
         )}
 
@@ -197,26 +256,40 @@ export default function NewOrderPage() {
             ) : (
               activeProducts.map((p) => {
                 const qty = cart[p.id] ?? 0;
+                const rate = rates[p.id] ?? p.pricePerCarton;
                 return (
-                  <Card key={p.id} className="p-3.5 flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-2xl overflow-hidden shrink-0">
-                      {p.photo.startsWith("data:") || p.photo.startsWith("http") ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={p.photo} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        p.photo
-                      )}
+                  <Card key={p.id} className="p-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center overflow-hidden shrink-0">
+                        {p.photo.startsWith("data:") || p.photo.startsWith("http") ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={p.photo} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <Icon name="box" size={22} />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-slate-900 text-sm truncate">{p.name}</p>
+                        <p className="text-xs text-slate-400">
+                          {inr(p.pricePerCarton)} / {p.cartonName.toLowerCase()} · {p.itemsPerCarton} pcs
+                        </p>
+                      </div>
+                      <Stepper value={qty} onChange={(v) => setCart({ ...cart, [p.id]: v })} />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-900 text-sm truncate">{p.name}</p>
-                      <p className="text-xs text-slate-400">
-                        {inr(p.pricePerCarton)} / {p.cartonName.toLowerCase()} · {p.itemsPerCarton} pcs
-                      </p>
-                    </div>
-                    <Stepper
-                      value={qty}
-                      onChange={(v) => setCart({ ...cart, [p.id]: v })}
-                    />
+                    {qty > 0 && (
+                      <div className="flex items-center justify-between mt-2.5 pt-2.5 border-t border-slate-50">
+                        <span className="text-xs text-slate-500">Rate / {p.cartonName.toLowerCase()} (negotiable)</span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-slate-400 text-sm">₹</span>
+                          <input
+                            type="number"
+                            value={rate}
+                            onChange={(e) => setRates({ ...rates, [p.id]: +e.target.value })}
+                            className="w-20 text-right rounded-lg border border-slate-200 px-2 py-1 text-sm outline-none focus:border-brand-400"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </Card>
                 );
               })
@@ -230,55 +303,33 @@ export default function NewOrderPage() {
           </div>
         )}
 
-        {/* STEP 3: Deliveryman */}
+        {/* STEP 3: Review */}
         {step === 3 && (
-          <div className="space-y-3 animate-fade-in">
-            {activeDeliverymen.length === 0 ? (
-              <EmptyState icon="truck" title="No deliverymen available" subtitle="Ask admin to add deliverymen." />
-            ) : (
-              activeDeliverymen.map((d) => (
-                <Card
-                  key={d.id}
-                  onClick={() => setDeliverymanId(d.id)}
-                  className={cx(
-                    "p-3.5 flex items-center gap-3 border-2",
-                    deliverymanId === d.id ? "border-brand-500 bg-brand-50/40" : "border-transparent"
-                  )}
-                >
-                  <div className="w-11 h-11 rounded-full bg-slate-50 flex items-center justify-center text-2xl overflow-hidden">
-                    {d.photo.startsWith("data:") || d.photo.startsWith("http") ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={d.photo} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      d.photo
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-slate-900">{d.fullName}</p>
-                    <p className="text-xs text-slate-400 flex items-center gap-1.5"><Icon name="pin" size={12} /> {d.area} · {d.vehicle || "—"}</p>
-                  </div>
-                  {deliverymanId === d.id && <span className="text-brand-600"><Icon name="check" size={20} /></span>}
-                </Card>
-              ))
-            )}
-          </div>
-        )}
-
-        {/* STEP 4: Review */}
-        {step === 4 && (
           <div className="space-y-4 animate-fade-in">
             <Card className="p-4">
               <p className="text-xs font-semibold text-slate-400 uppercase mb-2">Shop</p>
-              <p className="font-bold text-slate-900">{shop.shopPhoto.length <= 2 ? shop.shopPhoto + " " : ""}{shop.shopName}</p>
-              <p className="text-sm text-slate-500">{shop.shopContactName} · {shop.shopMobile}</p>
-              <p className="text-sm text-slate-500 mt-1 flex items-center gap-1.5"><Icon name="pin" size={14} /> {loc.address || shop.address}</p>
+              <p className="font-bold text-slate-900">{shop.shopName}</p>
+              {shop.ownerName && <p className="text-sm text-slate-500">Owner: {shop.ownerName}</p>}
+              <a href={`tel:${shop.shopMobile}`} className="text-sm text-brand-600 font-medium inline-flex items-center gap-1.5 mt-1">
+                <Icon name="phone" size={14} /> {shop.shopMobile}
+              </a>
+              {(shop.zone || shop.area) && (
+                <p className="text-sm text-slate-500 mt-1 flex items-center gap-1.5">
+                  <Icon name="pin" size={14} /> {[shop.zone, shop.area].filter(Boolean).join(" · ")}
+                </p>
+              )}
+              {loc.mapsLink && (
+                <a href={loc.mapsLink} target="_blank" rel="noreferrer" className="text-brand-600 text-sm font-medium inline-flex items-center gap-1.5 mt-1">
+                  <Icon name="map" size={14} /> Get Direction
+                </a>
+              )}
             </Card>
             <Card className="p-4">
               <p className="text-xs font-semibold text-slate-400 uppercase mb-3">Products</p>
               {items.map((it, i) => (
                 <div key={i} className="flex justify-between text-sm py-1">
                   <span className="text-slate-700">
-                    {it.productName} × {it.cartons}
+                    {it.productName} × {it.cartons} @ {inr(it.pricePerCarton)}
                   </span>
                   <span className="font-semibold">{inr(it.lineTotal)}</span>
                 </div>
@@ -288,12 +339,9 @@ export default function NewOrderPage() {
                 <span className="font-extrabold text-brand-600">{inr(total)}</span>
               </div>
             </Card>
-            <Card className="p-4">
-              <p className="text-xs font-semibold text-slate-400 uppercase mb-1">Deliveryman</p>
-              <p className="font-semibold text-slate-900">
-<span className="inline-flex items-center gap-1.5"><Icon name="truck" size={15} /> {store.deliverymen.find((d) => d.id === deliverymanId)?.fullName}</span>
-              </p>
-            </Card>
+            <p className="text-xs text-slate-400 text-center px-4">
+              The admin will assign a deliveryman to this order.
+            </p>
           </div>
         )}
       </div>
@@ -311,7 +359,7 @@ export default function NewOrderPage() {
           </Button>
         ) : (
           <Button className="flex-1" onClick={submit}>
-<Icon name="check" size={18} /> Submit Order
+            <Icon name="check" size={18} /> Submit Order
           </Button>
         )}
       </div>
@@ -319,39 +367,20 @@ export default function NewOrderPage() {
   );
 }
 
-function Stepper({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (v: number) => void;
-}) {
+function Stepper({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
     <div className="flex items-center gap-2">
       <button
-        type="button"
         onClick={() => onChange(Math.max(0, value - 1))}
-        className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold disabled:opacity-40 shrink-0"
-        disabled={value <= 0}
+        className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold disabled:opacity-40"
+        disabled={value === 0}
       >
         −
       </button>
-      <input
-        type="number"
-        inputMode="numeric"
-        min={0}
-        value={value === 0 ? "" : value}
-        placeholder="0"
-        onChange={(e) => {
-          const n = parseInt(e.target.value, 10);
-          onChange(Number.isNaN(n) || n < 0 ? 0 : n);
-        }}
-        className="w-12 text-center font-bold text-slate-900 border border-slate-200 rounded-lg py-1 outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-      />
+      <span className="w-6 text-center font-bold text-slate-900">{value}</span>
       <button
-        type="button"
         onClick={() => onChange(value + 1)}
-        className="w-7 h-7 rounded-lg bg-brand-600 text-white font-bold shrink-0"
+        className="w-7 h-7 rounded-lg bg-brand-600 text-white font-bold"
       >
         +
       </button>

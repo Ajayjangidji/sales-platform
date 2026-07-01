@@ -6,8 +6,9 @@ import type { NavItem } from "@/components/shell";
 
 const nav: NavItem[] = [
   { href: "/salesman/dashboard", label: "Home", icon: "home" },
-  { href: "/salesman/new-order", label: "New Order", icon: "plus" },
-  { href: "/salesman/orders", label: "My Orders", icon: "orders" },
+  { href: "/salesman/new-order", label: "New", icon: "plus" },
+  { href: "/salesman/orders", label: "Orders", icon: "orders" },
+  { href: "/salesman/shops", label: "Shops", icon: "shops" },
   { href: "/salesman/profile", label: "Profile", icon: "profile" },
 ];
 

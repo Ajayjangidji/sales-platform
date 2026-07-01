@@ -66,7 +66,7 @@ export default function AdminOrderDetail() {
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 text-brand-600 font-medium"
               >
-                <Icon name="map" size={15} /> Open in Maps
+                <Icon name="map" size={15} /> Get Direction
               </a>
             )}
           </div>
@@ -109,12 +109,20 @@ export default function AdminOrderDetail() {
         </Card>
 
         {/* Payment info */}
-        {order.paymentStatus === "Paid" && (
+        {(order.paymentStatus === "Paid" || order.paymentStatus === "Partial") && (
           <Card className="p-4">
             <p className="text-xs font-semibold text-slate-400 uppercase mb-2">Payment</p>
             <div className="text-sm space-y-1">
               <Row label="Mode" value={order.paymentMode ?? "-"} />
-              <Row label="Amount received" value={inr(order.amountReceived ?? order.totalAmount)} />
+              {order.split ? (
+                <>
+                  {order.split.cash > 0 && <Row label="Cash" value={inr(order.split.cash)} />}
+                  {order.split.online > 0 && <Row label="Online" value={inr(order.split.online)} />}
+                  {order.split.credit > 0 && <Row label="Credit (pending)" value={inr(order.split.credit)} />}
+                </>
+              ) : (
+                <Row label="Amount received" value={inr(order.amountReceived ?? order.totalAmount)} />
+              )}
               {order.transactionId && <Row label="Transaction ID" value={order.transactionId} />}
               {order.paidAt && <Row label="Paid at" value={formatDateTime(order.paidAt)} />}
             </div>
@@ -140,21 +148,26 @@ export default function AdminOrderDetail() {
           </div>
         </Card>
 
-        {/* Actions */}
-        <div className="grid grid-cols-2 gap-3">
-          <Button variant="secondary" onClick={() => setReassignOpen(true)}>
-<Icon name="refresh" size={16} /> Reassign
-          </Button>
-          <Button
-            variant="danger"
-            disabled={!canCancel}
-            onClick={() => {
-              if (confirm("Cancel this order?")) cancelOrder(order.id);
-            }}
-          >
-<Icon name="x" size={16} /> Cancel Order
-          </Button>
-        </div>
+        {/* Actions — disabled once the order is completed/cancelled */}
+        {canCancel ? (
+          <div className="grid grid-cols-2 gap-3">
+            <Button variant="secondary" onClick={() => setReassignOpen(true)}>
+              <Icon name="refresh" size={16} /> {order.deliverymanId ? "Reassign" : "Assign"}
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => {
+                if (confirm("Cancel this order?")) cancelOrder(order.id);
+              }}
+            >
+              <Icon name="x" size={16} /> Cancel Order
+            </Button>
+          </div>
+        ) : (
+          <p className="text-center text-xs text-slate-400">
+            This order is {order.status.toLowerCase()} — it can no longer be reassigned or cancelled.
+          </p>
+        )}
       </div>
 
       <Modal

@@ -8,6 +8,9 @@ import { Icon, type IconName } from "@/components/icons";
 import { TopBar, Avatar } from "@/components/shell";
 
 const items: { href: string; icon: IconName; label: string; desc: string }[] = [
+  { href: "/admin/shops", icon: "store", label: "Total Shops", desc: "All registered shops & filters" },
+  { href: "/admin/settings/business-categories", icon: "store", label: "Business Categories", desc: "Kirana, hardware, clinic, trading…" },
+  { href: "/admin/settings/zones", icon: "pin", label: "Zones & Areas", desc: "Manage delivery zones and areas" },
   { href: "/admin/qr", icon: "qr", label: "QR Code Management", desc: "Online payment QR" },
   { href: "/admin/reports", icon: "chart", label: "Reports & History", desc: "Sales, payments, delivery" },
   { href: "/admin/profile", icon: "user", label: "Profile & Password", desc: "Admin account settings" },
