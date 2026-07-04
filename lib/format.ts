@@ -1,5 +1,6 @@
-export function inr(n: number): string {
-  return "₹" + n.toLocaleString("en-IN");
+export function inr(n: number | undefined | null): string {
+  const v = Number(n);
+  return "₹" + (Number.isFinite(v) ? v : 0).toLocaleString("en-IN");
 }
 
 export function formatDate(iso: string): string {

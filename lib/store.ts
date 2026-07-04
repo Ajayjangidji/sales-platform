@@ -118,6 +118,31 @@ function pushHistory(o: Order, status: string): Order {
   return { ...o, history: [...o.history, { status, at: new Date().toISOString() }] };
 }
 
+/** Fill safe defaults so partial/hand-edited orders never crash the UI. */
+function normalizeOrder(o: any): Order {
+  return {
+    orderNo: o?.id ?? "ORD-?",
+    createdAt: new Date().toISOString(),
+    shopName: "Unknown Shop",
+    shopContactName: "",
+    shopMobile: "",
+    shopPhoto: "",
+    salesmanId: "",
+    salesmanName: "",
+    deliverymanId: "",
+    deliverymanName: "",
+    status: "Pending Admin Review",
+    paymentStatus: "Unpaid",
+    paymentMode: null,
+    ...o,
+    items: Array.isArray(o?.items) ? o.items : [],
+    history: Array.isArray(o?.history) ? o.history : [],
+    totalAmount: Number(o?.totalAmount) || 0,
+    location: o?.location ?? { latitude: null, longitude: null, address: "", mapsLink: "" },
+    id: o?.id,
+  } as Order;
+}
+
 export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
@@ -152,7 +177,7 @@ export const useStore = create<AppState>()(
             products: d.products ?? [],
             salesmen: d.salesmen ?? [],
             deliverymen: d.deliverymen ?? [],
-            orders: d.orders ?? [],
+            orders: (d.orders ?? []).map(normalizeOrder),
             qr: d.qr ?? { image: "", upiName: "", status: "Inactive" },
             adminPassword: d.admin?.password ?? ADMIN_CREDENTIALS.password,
             hydrated: true,
