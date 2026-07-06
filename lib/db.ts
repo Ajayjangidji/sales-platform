@@ -11,6 +11,7 @@ export interface Collections {
   businessCategories: any[];
   zones: any[];
   shops: any[];
+  followups: any[];
   products: any[];
   salesmen: any[];
   deliverymen: any[];
@@ -24,6 +25,7 @@ const DEFAULTS: Record<string, any> = {
   businessCategories: [],
   zones: [],
   shops: [],
+  followups: [],
   products: [],
   salesmen: [],
   deliverymen: [],
@@ -90,6 +92,7 @@ export async function readAll(): Promise<Collections> {
     businessCategories: map.businessCategories ?? [],
     zones: map.zones ?? [],
     shops: map.shops ?? [],
+    followups: map.followups ?? [],
     products: map.products ?? [],
     salesmen: map.salesmen ?? [],
     deliverymen: map.deliverymen ?? [],

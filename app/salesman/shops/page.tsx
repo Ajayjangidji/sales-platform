@@ -7,7 +7,7 @@ export default function SalesmanShopsPage() {
   return (
     <div>
       <TopBar title="Shops" subtitle="All shops you have visited" />
-      <ShopsBrowser />
+      <ShopsBrowser salesman />
     </div>
   );
 }

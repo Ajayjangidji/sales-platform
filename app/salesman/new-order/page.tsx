@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
-import type { OrderItem, ShopLocation } from "@/lib/types";
+import type { OrderItem, ShopLocation, Shop } from "@/lib/types";
 import { Button, Card, Field, Input, Select, cx, EmptyState } from "@/components/ui";
 import { TopBar, PhotoPicker } from "@/components/shell";
 import { Icon } from "@/components/icons";
+import { FollowupModal } from "@/components/FollowupModal";
 import { inr } from "@/lib/format";
 
 const steps = ["Shop", "Location", "Products", "Review"];
@@ -43,9 +44,34 @@ export default function NewOrderPage() {
   const [locating, setLocating] = useState(false);
   const [cart, setCart] = useState<Record<string, number>>({});
   const [rates, setRates] = useState<Record<string, number>>({});
+  const [followupOpen, setFollowupOpen] = useState(false);
 
   const activeProducts = store.products.filter((p) => p.status === "Active");
   const selectedZone = store.zones.find((z) => z.name === shop.zone);
+
+  function prefillFromShop(s: Shop) {
+    setShop({
+      shopName: s.name,
+      ownerName: s.ownerName,
+      shopMobile: s.mobile,
+      shopPhoto: s.photo,
+      businessCategoryId: s.businessCategoryId ?? "",
+      zone: s.zone,
+      area: s.area,
+    });
+    if (s.location) setLoc(s.location);
+  }
+
+  // Prefill when opened from a shop ("New Order" button) via ?shopId=...
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const shopId = new URLSearchParams(window.location.search).get("shopId");
+    if (shopId) {
+      const s = store.shops.find((x) => x.id === shopId);
+      if (s) prefillFromShop(s);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const items: OrderItem[] = Object.entries(cart)
     .filter(([, qty]) => qty > 0)
@@ -166,6 +192,28 @@ export default function NewOrderPage() {
         {/* STEP 0: Shop */}
         {step === 0 && (
           <div className="space-y-4 animate-fade-in">
+            {store.shops.length > 0 && (
+              <div className="bg-brand-50 border border-brand-100 rounded-2xl p-3.5">
+                <p className="text-sm font-semibold text-brand-700 mb-1.5">
+                  Ordering from a saved shop?
+                </p>
+                <Select
+                  value=""
+                  onChange={(e) => {
+                    const s = store.shops.find((x) => x.id === e.target.value);
+                    if (s) prefillFromShop(s);
+                  }}
+                >
+                  <option value="">Select existing shop to auto-fill…</option>
+                  {store.shops.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                      {s.mobile ? ` · ${s.mobile}` : ""}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+            )}
             <div className="flex items-center gap-4">
               <PhotoPicker value={shop.shopPhoto} onChange={(v) => setShop({ ...shop, shopPhoto: v })} />
               <p className="text-xs text-slate-400">Take/upload a photo of the shop.</p>
@@ -215,6 +263,16 @@ export default function NewOrderPage() {
                 </Select>
               </Field>
             </div>
+
+            <button
+              onClick={() => {
+                if (!shop.shopName.trim()) return alert("Enter or select the shop first.");
+                setFollowupOpen(true);
+              }}
+              className="w-full text-sm text-slate-500 border border-dashed border-slate-300 rounded-xl py-2.5 flex items-center justify-center gap-2 hover:border-brand-300 hover:text-brand-600 transition"
+            >
+              <Icon name="clock" size={16} /> Shopkeeper busy? Schedule a follow-up instead
+            </button>
           </div>
         )}
 
@@ -363,6 +421,19 @@ export default function NewOrderPage() {
           </Button>
         )}
       </div>
+
+      <FollowupModal
+        open={followupOpen}
+        onClose={() => setFollowupOpen(false)}
+        target={{
+          shopId: store.shops.find((s) => s.mobile === shop.shopMobile.trim())?.id,
+          shopName: shop.shopName,
+          shopMobile: shop.shopMobile,
+          zone: shop.zone,
+          area: shop.area,
+        }}
+        onSaved={() => router.replace("/salesman/dashboard")}
+      />
     </div>
   );
 }

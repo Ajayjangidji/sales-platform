@@ -7,6 +7,7 @@ import type {
   BusinessCategory,
   Zone,
   Shop,
+  Followup,
   Product,
   Salesman,
   Deliveryman,
@@ -44,6 +45,7 @@ interface AppState {
   businessCategories: BusinessCategory[];
   zones: Zone[];
   shops: Shop[];
+  followups: Followup[];
   products: Product[];
   salesmen: Salesman[];
   deliverymen: Deliveryman[];
@@ -71,6 +73,10 @@ interface AppState {
   addShop: (s: Omit<Shop, "id" | "createdAt">) => Shop;
   updateShop: (id: string, s: Partial<Shop>) => void;
   deleteShop: (id: string) => void;
+
+  addFollowup: (f: Omit<Followup, "id" | "createdAt" | "status">) => void;
+  markFollowupDone: (id: string) => void;
+  deleteFollowup: (id: string) => void;
 
   addProduct: (p: Omit<Product, "id" | "createdAt">) => void;
   updateProduct: (id: string, p: Partial<Product>) => void;
@@ -155,6 +161,7 @@ export const useStore = create<AppState>()(
       businessCategories: [],
       zones: [],
       shops: [],
+      followups: [],
       products: [],
       salesmen: [],
       deliverymen: [],
@@ -174,6 +181,7 @@ export const useStore = create<AppState>()(
             businessCategories: d.businessCategories ?? [],
             zones: d.zones ?? [],
             shops: d.shops ?? [],
+            followups: d.followups ?? [],
             products: d.products ?? [],
             salesmen: d.salesmen ?? [],
             deliverymen: d.deliverymen ?? [],
@@ -288,6 +296,28 @@ export const useStore = create<AppState>()(
       deleteShop: (id) => {
         set((s) => ({ shops: s.shops.filter((x) => x.id !== id) }));
         persistOp("shops", "delete", { id });
+      },
+
+      // ---- follow-ups (revisit reminders) ----
+      addFollowup: (f) => {
+        const record: Followup = {
+          ...f,
+          id: uid("fu"),
+          status: "Pending",
+          createdAt: new Date().toISOString(),
+        };
+        set((s) => ({ followups: [record, ...s.followups] }));
+        persistOp("followups", "insert", record);
+      },
+      markFollowupDone: (id) => {
+        set((s) => ({
+          followups: s.followups.map((x) => (x.id === id ? { ...x, status: "Done" } : x)),
+        }));
+        persistOp("followups", "update", { id, patch: { status: "Done" } });
+      },
+      deleteFollowup: (id) => {
+        set((s) => ({ followups: s.followups.filter((x) => x.id !== id) }));
+        persistOp("followups", "delete", { id });
       },
 
       // ---- products ----

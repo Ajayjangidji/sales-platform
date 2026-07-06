@@ -43,6 +43,22 @@ export interface PaymentSplit {
   credit: number;
 }
 
+/** A revisit reminder — shopkeeper asked the salesman to come back later. */
+export interface Followup {
+  id: string;
+  shopId?: string;
+  shopName: string;
+  shopMobile: string;
+  zone?: string;
+  area?: string;
+  salesmanId: string;
+  salesmanName: string;
+  note: string;
+  revisitDate: string; // YYYY-MM-DD
+  status: "Pending" | "Done";
+  createdAt: string;
+}
+
 /** A shop/customer record, unique by mobile number. */
 export interface Shop {
   id: string;

@@ -1,12 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import type { Shop } from "@/lib/types";
 import { Card, Badge, Button, Modal, Select, Thumb, EmptyState, cx } from "@/components/ui";
 import { Icon } from "@/components/icons";
+import { FollowupModal } from "@/components/FollowupModal";
 
-export function ShopsBrowser() {
+export function ShopsBrowser({ salesman = false }: { salesman?: boolean }) {
+  const router = useRouter();
   const shops = useStore((s) => s.shops);
   const zones = useStore((s) => s.zones);
   const businessCategories = useStore((s) => s.businessCategories);
@@ -16,6 +19,7 @@ export function ShopsBrowser() {
   const [area, setArea] = useState("");
   const [cat, setCat] = useState("");
   const [selected, setSelected] = useState<Shop | null>(null);
+  const [followupOpen, setFollowupOpen] = useState(false);
 
   const zoneObj = zones.find((z) => z.name === zone);
 
@@ -133,9 +137,48 @@ export function ShopsBrowser() {
                 </Button>
               </a>
             </div>
+
+            {salesman && (
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  className="w-full"
+                  size="sm"
+                  onClick={() => router.push(`/salesman/new-order?shopId=${selected.id}`)}
+                >
+                  <Icon name="plus" size={16} /> New Order
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  size="sm"
+                  onClick={() => setFollowupOpen(true)}
+                >
+                  <Icon name="clock" size={16} /> Follow-up
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </Modal>
+
+      {salesman && (
+        <FollowupModal
+          open={followupOpen}
+          onClose={() => setFollowupOpen(false)}
+          target={
+            selected
+              ? {
+                  shopId: selected.id,
+                  shopName: selected.name,
+                  shopMobile: selected.mobile,
+                  zone: selected.zone,
+                  area: selected.area,
+                }
+              : null
+          }
+          onSaved={() => setSelected(null)}
+        />
+      )}
     </div>
   );
 }
