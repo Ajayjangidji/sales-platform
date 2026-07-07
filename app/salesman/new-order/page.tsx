@@ -68,7 +68,10 @@ export default function NewOrderPage() {
     const shopId = new URLSearchParams(window.location.search).get("shopId");
     if (shopId) {
       const s = store.shops.find((x) => x.id === shopId);
-      if (s) prefillFromShop(s);
+      if (s) {
+        prefillFromShop(s);
+        setStep(2); // details already saved — jump straight to Products
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -116,11 +119,18 @@ export default function NewOrderPage() {
     );
   }
 
+  function stepValid(i: number): boolean {
+    if (i === 0) return shop.shopName.trim() !== "" && shop.shopMobile.trim() !== "";
+    if (i === 1) return loc.latitude !== null;
+    if (i === 2) return items.length > 0;
+    return true;
+  }
   function canNext(): boolean {
-    if (step === 0)
-      return shop.shopName.trim() !== "" && shop.shopMobile.trim() !== "";
-    if (step === 1) return loc.latitude !== null;
-    if (step === 2) return items.length > 0;
+    return stepValid(step);
+  }
+  // A step is reachable once every step before it is valid.
+  function canGoTo(i: number): boolean {
+    for (let j = 0; j < i; j++) if (!stepValid(j)) return false;
     return true;
   }
 
@@ -173,7 +183,13 @@ export default function NewOrderPage() {
       <div className="px-4 pt-3">
         <div className="flex items-center gap-1">
           {steps.map((s, i) => (
-            <div key={s} className="flex-1">
+            <button
+              key={s}
+              type="button"
+              onClick={() => canGoTo(i) && setStep(i)}
+              disabled={!canGoTo(i)}
+              className="flex-1 text-left disabled:cursor-not-allowed"
+            >
               <div
                 className={cx(
                   "h-1.5 rounded-full transition-colors",
@@ -183,7 +199,7 @@ export default function NewOrderPage() {
               <p className={cx("text-[10px] mt-1 font-semibold", i <= step ? "text-brand-600" : "text-slate-300")}>
                 {s}
               </p>
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -192,28 +208,6 @@ export default function NewOrderPage() {
         {/* STEP 0: Shop */}
         {step === 0 && (
           <div className="space-y-4 animate-fade-in">
-            {store.shops.length > 0 && (
-              <div className="bg-brand-50 border border-brand-100 rounded-2xl p-3.5">
-                <p className="text-sm font-semibold text-brand-700 mb-1.5">
-                  Ordering from a saved shop?
-                </p>
-                <Select
-                  value=""
-                  onChange={(e) => {
-                    const s = store.shops.find((x) => x.id === e.target.value);
-                    if (s) prefillFromShop(s);
-                  }}
-                >
-                  <option value="">Select existing shop to auto-fill…</option>
-                  {store.shops.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                      {s.mobile ? ` · ${s.mobile}` : ""}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-            )}
             <div className="flex items-center gap-4">
               <PhotoPicker value={shop.shopPhoto} onChange={(v) => setShop({ ...shop, shopPhoto: v })} />
               <p className="text-xs text-slate-400">Take/upload a photo of the shop.</p>
@@ -263,16 +257,6 @@ export default function NewOrderPage() {
                 </Select>
               </Field>
             </div>
-
-            <button
-              onClick={() => {
-                if (!shop.shopName.trim()) return alert("Enter or select the shop first.");
-                setFollowupOpen(true);
-              }}
-              className="w-full text-sm text-slate-500 border border-dashed border-slate-300 rounded-xl py-2.5 flex items-center justify-center gap-2 hover:border-brand-300 hover:text-brand-600 transition"
-            >
-              <Icon name="clock" size={16} /> Shopkeeper busy? Schedule a follow-up instead
-            </button>
           </div>
         )}
 
@@ -309,6 +293,15 @@ export default function NewOrderPage() {
         {/* STEP 2: Products */}
         {step === 2 && (
           <div className="space-y-3 animate-fade-in">
+            <button
+              onClick={() => {
+                if (!shop.shopName.trim()) return alert("Enter or select the shop first.");
+                setFollowupOpen(true);
+              }}
+              className="w-full text-sm text-slate-500 border border-dashed border-slate-300 rounded-xl py-2.5 flex items-center justify-center gap-2 hover:border-brand-300 hover:text-brand-600 transition"
+            >
+              <Icon name="clock" size={16} /> Shopkeeper busy? Schedule a follow-up instead
+            </button>
             {activeProducts.length === 0 ? (
               <EmptyState icon="box" title="No active products" subtitle="Ask admin to add products." />
             ) : (

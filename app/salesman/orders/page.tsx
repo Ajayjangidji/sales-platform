@@ -64,6 +64,11 @@ export default function SalesmanOrders() {
                         <Badge className={statusColor(o.paymentStatus)}>{o.paymentStatus}</Badge>
                       </div>
                       <p className="text-xs text-slate-400 mt-2 flex items-center gap-1.5"><Icon name="truck" size={13} /> {o.deliverymanName || "Unassigned"}</p>
+                      {(o.zone || o.area) && (
+                        <p className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+                          <Icon name="pin" size={13} /> {[o.zone, o.area].filter(Boolean).join(" · ")}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </Card>

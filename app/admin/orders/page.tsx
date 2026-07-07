@@ -130,10 +130,15 @@ function OrderCard({ o }: { o: Order }) {
             </Badge>
           </div>
           <p className="text-xs text-slate-400 mt-2">
-<span className="inline-flex items-center gap-1"><Icon name="user" size={12} /> {o.salesmanName}</span>
+            <span className="inline-flex items-center gap-1"><Icon name="user" size={12} /> {o.salesmanName}</span>
             <span className="mx-1">→</span>
             <span className="inline-flex items-center gap-1"><Icon name="truck" size={12} /> {o.deliverymanName || "Unassigned"}</span>
           </p>
+          {(o.zone || o.area) && (
+            <p className="text-xs text-slate-400 mt-1 inline-flex items-center gap-1">
+              <Icon name="pin" size={12} /> {[o.zone, o.area].filter(Boolean).join(" · ")}
+            </p>
+          )}
         </div>
       </div>
     </Card>
