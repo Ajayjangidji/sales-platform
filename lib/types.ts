@@ -116,6 +116,8 @@ export interface Deliveryman {
   loginId: string;
   password: string;
   area: string;
+  /** Zone ids assigned to this deliveryman, or ["all"] for all zones. */
+  zones?: string[];
   status: "Active" | "Inactive";
   createdAt: string;
 }

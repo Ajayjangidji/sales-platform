@@ -155,6 +155,14 @@ export default function NewOrderPage() {
       shopId = store.addShop(shopData).id;
     }
 
+    // Auto-assign an active deliveryman whose zones cover this order's zone.
+    const zoneId = store.zones.find((z) => z.name === shop.zone)?.id;
+    const dm = store.deliverymen.find(
+      (d) =>
+        d.status === "Active" &&
+        (d.zones?.includes("all") || (!!zoneId && d.zones?.includes(zoneId)))
+    );
+
     const order = store.createOrder({
       shopName: shop.shopName,
       shopContactName: shop.ownerName,
@@ -167,11 +175,21 @@ export default function NewOrderPage() {
       location: loc,
       salesmanId: user!.id,
       salesmanName: user!.name,
-      deliverymanId: "",
-      deliverymanName: "",
+      deliverymanId: dm?.id ?? "",
+      deliverymanName: dm?.fullName ?? "",
       items,
       totalAmount: total,
     });
+
+    // Placing an order clears any pending follow-up for this shop.
+    store.followups
+      .filter(
+        (f) =>
+          f.status === "Pending" &&
+          (f.shopId === shopId || f.shopMobile === shop.shopMobile.trim())
+      )
+      .forEach((f) => store.markFollowupDone(f.id));
+
     router.replace(`/salesman/orders/${order.id}?new=1`);
   }
 
@@ -391,7 +409,8 @@ export default function NewOrderPage() {
               </div>
             </Card>
             <p className="text-xs text-slate-400 text-center px-4">
-              The admin will assign a deliveryman to this order.
+              A deliveryman is auto-assigned based on the shop&apos;s zone. If none matches,
+              the admin will assign one.
             </p>
           </div>
         )}

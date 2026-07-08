@@ -310,6 +310,7 @@ function PersonForm({
         loginId: form.loginId,
         password: form.password,
         area: form.area,
+        zones: form.zones,
         status: form.status,
       };
       if (initial) store.updateDeliveryman(initial.id, data);
@@ -391,7 +392,7 @@ function PersonForm({
             )}
           </Field>
         </div>
-        {kind === "salesman" && (
+        {(
           <div>
             <p className="text-sm font-semibold text-slate-700 mb-2">Assigned zones</p>
             <div className="space-y-1.5">
