@@ -155,14 +155,7 @@ export default function NewOrderPage() {
       shopId = store.addShop(shopData).id;
     }
 
-    // Auto-assign an active deliveryman whose zones cover this order's zone.
-    const zoneId = store.zones.find((z) => z.name === shop.zone)?.id;
-    const dm = store.deliverymen.find(
-      (d) =>
-        d.status === "Active" &&
-        (d.zones?.includes("all") || (!!zoneId && d.zones?.includes(zoneId)))
-    );
-
+    // Deliveryman is auto-assigned inside createOrder based on the shop's zone.
     const order = store.createOrder({
       shopName: shop.shopName,
       shopContactName: shop.ownerName,
@@ -175,8 +168,8 @@ export default function NewOrderPage() {
       location: loc,
       salesmanId: user!.id,
       salesmanName: user!.name,
-      deliverymanId: dm?.id ?? "",
-      deliverymanName: dm?.fullName ?? "",
+      deliverymanId: "",
+      deliverymanName: "",
       items,
       totalAmount: total,
     });

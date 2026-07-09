@@ -124,6 +124,24 @@ function pushHistory(o: Order, status: string): Order {
   return { ...o, history: [...o.history, { status, at: new Date().toISOString() }] };
 }
 
+/** Does a deliveryman cover the given order zone? Handles the new `zones`
+ *  array plus the legacy `area` text ("All Zone" / a zone name). */
+export function deliverymanCoversZone(
+  d: Deliveryman,
+  orderZone: string | undefined,
+  zones: Zone[]
+): boolean {
+  const dz = Array.isArray(d.zones) ? d.zones : [];
+  if (dz.includes("all")) return true;
+  const zoneId = orderZone ? zones.find((z) => z.name === orderZone)?.id : undefined;
+  if (zoneId && dz.includes(zoneId)) return true;
+  const area = (d.area || "").trim().toLowerCase();
+  if (area === "all" || area === "all zone" || area === "all zones") return true;
+  if (orderZone && d.area && d.area.trim().toLowerCase() === orderZone.trim().toLowerCase())
+    return true;
+  return false;
+}
+
 /** Fill safe defaults so partial/hand-edited orders never crash the UI. */
 function normalizeOrder(o: any): Order {
   return {
@@ -397,17 +415,32 @@ export const useStore = create<AppState>()(
       // ---- orders ----
       createOrder: (o) => {
         const now = new Date().toISOString();
+        // Auto-assign a deliveryman whose zone covers this order's zone.
+        let deliverymanId = o.deliverymanId;
+        let deliverymanName = o.deliverymanName;
+        if (!deliverymanId) {
+          const dm = get().deliverymen.find(
+            (d) => d.status === "Active" && deliverymanCoversZone(d, o.zone, get().zones)
+          );
+          if (dm) {
+            deliverymanId = dm.id;
+            deliverymanName = dm.fullName;
+          }
+        }
+        const assigned = !!deliverymanId;
         const order: Order = {
           ...o,
+          deliverymanId,
+          deliverymanName,
           id: uid("ord"),
           orderNo: `ORD-${1001 + get().orders.length}`,
           createdAt: now,
-          status: o.deliverymanId ? "Deliveryman Assigned" : "Pending Admin Review",
+          status: assigned ? "Deliveryman Assigned" : "Pending Admin Review",
           paymentStatus: "Unpaid",
           paymentMode: null,
           history: [
             { status: "Pending Admin Review", at: now },
-            ...(o.deliverymanId ? [{ status: "Deliveryman Assigned", at: now }] : []),
+            ...(assigned ? [{ status: "Deliveryman Assigned", at: now }] : []),
           ],
         };
         set((s) => ({ orders: [order, ...s.orders] }));

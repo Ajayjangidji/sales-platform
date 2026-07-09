@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
-import { Card, Button, Field, Input } from "@/components/ui";
+import { Card } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { TopBar, Avatar } from "@/components/shell";
 
@@ -11,24 +10,9 @@ export default function DeliverymanProfile() {
   const router = useRouter();
   const user = useStore((s) => s.currentUser);
   const me = useStore((s) => s.deliverymen.find((x) => x.id === user?.id));
-  const updateDeliveryman = useStore((s) => s.updateDeliveryman);
   const logout = useStore((s) => s.logout);
 
-  const [pw, setPw] = useState("");
-  const [pw2, setPw2] = useState("");
-  const [msg, setMsg] = useState("");
-
   if (!me) return null;
-
-  function changePassword() {
-    setMsg("");
-    if (pw.length < 4) return setMsg("Password must be at least 4 characters.");
-    if (pw !== pw2) return setMsg("Passwords do not match.");
-    updateDeliveryman(me!.id, { password: pw });
-    setPw("");
-    setPw2("");
-    setMsg("Password updated.");
-  }
 
   return (
     <div>
@@ -50,21 +34,9 @@ export default function DeliverymanProfile() {
           <Row label="Address" value={me.address || "—"} />
         </Card>
 
-        <Card className="p-5">
-          <p className="font-bold text-slate-900 mb-4">Change Password</p>
-          <div className="space-y-4">
-            <Field label="New password">
-              <Input type="password" value={pw} onChange={(e) => setPw(e.target.value)} />
-            </Field>
-            <Field label="Confirm password">
-              <Input type="password" value={pw2} onChange={(e) => setPw2(e.target.value)} />
-            </Field>
-            {msg && <p className={`text-sm ${msg.includes("updated") ? "text-emerald-600" : "text-rose-600"}`}>{msg}</p>}
-            <Button className="w-full" onClick={changePassword}>
-              Update Password
-            </Button>
-          </div>
-        </Card>
+        <p className="text-center text-xs text-slate-400 px-4">
+          To change your password or details, please contact the admin.
+        </p>
 
         <button
           onClick={() => {
@@ -74,7 +46,7 @@ export default function DeliverymanProfile() {
           className="w-full"
         >
           <Card className="p-4 flex items-center justify-center gap-2 text-rose-600 font-semibold">
-<Icon name="power" size={18} /> Logout
+            <Icon name="power" size={18} /> Logout
           </Card>
         </button>
       </div>
