@@ -2,7 +2,7 @@
 
 import { useStore } from "@/lib/store";
 import { Card, Button, Field, Input, Badge } from "@/components/ui";
-import { TopBar, fileToDataUrl } from "@/components/shell";
+import { TopBar, compressImage } from "@/components/shell";
 import { Icon } from "@/components/icons";
 import { statusColor } from "@/lib/format";
 
@@ -42,7 +42,7 @@ export default function QRPage() {
                 className="mt-2 block w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-brand-50 file:text-brand-700 file:font-semibold"
                 onChange={async (e) => {
                   const f = e.target.files?.[0];
-                  if (f) updateQR({ image: await fileToDataUrl(f) });
+                  if (f) updateQR({ image: await compressImage(f, 1000, 0.85) });
                 }}
               />
             </label>

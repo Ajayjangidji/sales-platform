@@ -278,6 +278,46 @@ export function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
+/**
+ * Read an image file, resize it down to `maxDim` px and re-encode as JPEG so the
+ * stored data URL stays small (a few tens of KB). Prevents the database from
+ * bloating with multi-MB base64 photos.
+ */
+export function compressImage(file: File, maxDim = 700, quality = 0.6): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const src = reader.result as string;
+      const img = new Image();
+      img.onload = () => {
+        try {
+          let { width, height } = img;
+          if (width >= height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return resolve(src);
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", quality));
+        } catch {
+          resolve(src);
+        }
+      };
+      img.onerror = () => resolve(src);
+      img.src = src;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 /** A square image/emoji picker used across forms. */
 export function PhotoPicker({
   value,
@@ -305,7 +345,7 @@ export function PhotoPicker({
         className="hidden"
         onChange={async (e) => {
           const f = e.target.files?.[0];
-          if (f) onChange(await fileToDataUrl(f));
+          if (f) onChange(await compressImage(f));
         }}
       />
       <span className="absolute bottom-0 inset-x-0 bg-black/40 text-white text-[9px] text-center py-0.5">

@@ -6,7 +6,7 @@ import { useStore } from "@/lib/store";
 import type { PaymentMode } from "@/lib/types";
 import { Card, Badge, Button, Modal, Field, Input, Textarea, EmptyState, cx, Thumb } from "@/components/ui";
 import { Icon, type IconName } from "@/components/icons";
-import { TopBar, fileToDataUrl } from "@/components/shell";
+import { TopBar, compressImage } from "@/components/shell";
 import { inr, statusColor, formatDateTime } from "@/lib/format";
 
 export default function DeliveryOrderDetail() {
@@ -298,7 +298,7 @@ export default function DeliveryOrderDetail() {
                   className="mt-2 block w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-brand-50 file:text-brand-700 file:font-semibold"
                   onChange={async (e) => {
                     const f = e.target.files?.[0];
-                    if (f) setScreenshot(await fileToDataUrl(f));
+                    if (f) setScreenshot(await compressImage(f, 900, 0.7));
                   }}
                 />
                 {screenshot && <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1"><Icon name="check" size={13} /> Screenshot attached</p>}
