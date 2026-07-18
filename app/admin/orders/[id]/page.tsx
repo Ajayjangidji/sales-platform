@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { Card, Badge, Button, Modal, Field, Select, EmptyState, Thumb } from "@/components/ui";
+import { EditOrderItems } from "@/components/EditOrderItems";
 import { Icon } from "@/components/icons";
 import { TopBar } from "@/components/shell";
 import { inr, statusColor, formatDateTime } from "@/lib/format";
@@ -148,24 +149,28 @@ export default function AdminOrderDetail() {
           </div>
         </Card>
 
-        {/* Actions — disabled once the order is completed/cancelled */}
-        {canCancel ? (
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="secondary" onClick={() => setReassignOpen(true)}>
-              <Icon name="refresh" size={16} /> {order.deliverymanId ? "Reassign" : "Assign"}
-            </Button>
-            <Button
-              variant="danger"
-              onClick={() => {
-                if (confirm("Cancel this order?")) cancelOrder(order.id);
-              }}
-            >
-              <Icon name="x" size={16} /> Cancel Order
-            </Button>
-          </div>
-        ) : (
+        {/* Actions */}
+        <div className={canCancel ? "grid grid-cols-3 gap-3" : "grid grid-cols-1 gap-3"}>
+          <EditOrderItems order={order} />
+          {canCancel && (
+            <>
+              <Button variant="secondary" onClick={() => setReassignOpen(true)}>
+                <Icon name="refresh" size={16} /> {order.deliverymanId ? "Reassign" : "Assign"}
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => {
+                  if (confirm("Cancel this order?")) cancelOrder(order.id);
+                }}
+              >
+                <Icon name="x" size={16} /> Cancel
+              </Button>
+            </>
+          )}
+        </div>
+        {!canCancel && (
           <p className="text-center text-xs text-slate-400">
-            This order is {order.status.toLowerCase()} — it can no longer be reassigned or cancelled.
+            This order is {order.status.toLowerCase()} — it can no longer be edited, reassigned, or cancelled.
           </p>
         )}
       </div>

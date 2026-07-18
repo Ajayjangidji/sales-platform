@@ -116,6 +116,8 @@ interface AppState {
     }
   ) => void;
 
+  updateOrderItems: (orderId: string, items: Order["items"]) => void;
+
   updateQR: (q: Partial<QRConfig>) => void;
   changeAdminPassword: (pw: string) => void;
 }
@@ -520,6 +522,30 @@ export const useStore = create<AppState>()(
           ),
         }));
         void order;
+        const updated = get().orders.find((o) => o.id === orderId);
+        if (updated) persistOp("orders", "update", { id: orderId, patch: updated });
+      },
+
+      updateOrderItems: (orderId, items) => {
+        const current = get().orders.find((order) => order.id === orderId);
+        if (!current || ["Completed", "Delivered", "Cancelled"].includes(current.status)) return;
+        const normalized = items
+          .filter((item) => item.cartons > 0)
+          .map((item) => ({ ...item, lineTotal: item.cartons * item.pricePerCarton }));
+        if (normalized.length === 0) return;
+        const totalAmount = normalized.reduce((sum, item) => sum + item.lineTotal, 0);
+        const oldCartons = current.items.reduce((sum, item) => sum + item.cartons, 0);
+        const newCartons = normalized.reduce((sum, item) => sum + item.cartons, 0);
+        set((s) => ({
+          orders: s.orders.map((o) =>
+            o.id === orderId
+              ? pushHistory(
+                  { ...o, items: normalized, totalAmount },
+                  `Items edited (${oldCartons} → ${newCartons} packs)`
+                )
+              : o
+          ),
+        }));
         const updated = get().orders.find((o) => o.id === orderId);
         if (updated) persistOp("orders", "update", { id: orderId, patch: updated });
       },

@@ -32,6 +32,19 @@ export function isToday(iso: string): boolean {
   );
 }
 
+export function localDateKey(iso: string): string {
+  const date = new Date(iso);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export function isInDateRange(iso: string, from: string, to: string): boolean {
+  const date = localDateKey(iso);
+  return (!from || date >= from) && (!to || date <= to);
+}
+
 export function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);

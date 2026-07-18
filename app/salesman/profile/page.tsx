@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { Card, Button } from "@/components/ui";
@@ -33,6 +34,19 @@ export default function SalesmanProfile() {
           <Row label="Mobile" value={me.mobile} />
           <Row label="Email" value={me.email || "—"} />
         </Card>
+
+        <Link href="/salesman/reports" className="block">
+          <Card className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+              <Icon name="chart" size={20} />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-slate-900">Reports & History</p>
+              <p className="text-xs text-slate-400">Your sales, payments, products and order history</p>
+            </div>
+            <span className="text-xl text-slate-300">›</span>
+          </Card>
+        </Link>
 
         <Card className="p-5">
           <p className="font-bold text-slate-900">Change Profile Details</p>

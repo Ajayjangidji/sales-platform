@@ -41,15 +41,12 @@ export default function ProductsPage() {
     updateProduct,
     deleteProduct,
     toggleProductStatus,
-    addCategory,
-    deleteCategory,
   } = useStore();
 
   const [activeCat, setActiveCat] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
-  const [catOpen, setCatOpen] = useState(false);
   const [viewing, setViewing] = useState<Product | null>(null);
 
   const countFor = (catId: string) =>
@@ -111,18 +108,6 @@ export default function ProductsPage() {
               count={countFor(c.id)}
             />
           ))}
-          <Chip
-            active={activeCat === "none"}
-            onClick={() => setActiveCat("none")}
-            label="Uncategorized"
-            count={products.filter((p) => !p.categoryId).length}
-          />
-          <button
-            onClick={() => setCatOpen(true)}
-            className="shrink-0 px-3 py-1.5 rounded-full text-sm font-semibold border border-dashed border-brand-300 text-brand-600 bg-brand-50/50"
-          >
-            ⚙️ Manage
-          </button>
         </div>
 
         {/* Product list */}
@@ -221,7 +206,7 @@ export default function ProductsPage() {
                 <Badge className={statusColor(viewing.status)}>{viewing.status}</Badge>
               </div>
             </div>
-            <DetailRow label="Category" value={categories.find((c) => c.id === viewing.categoryId)?.name ?? "Uncategorized"} />
+            <DetailRow label="Category" value={categories.find((c) => c.id === viewing.categoryId)?.name ?? "—"} />
             <DetailRow label="Packaging" value={viewing.cartonName} />
             <DetailRow label={`Items per ${viewing.cartonName.toLowerCase()}`} value={String(viewing.itemsPerCarton)} />
             <DetailRow label="Available stock" value={`${viewing.availableCartons} ${viewing.cartonName.toLowerCase()}s`} />
@@ -236,15 +221,6 @@ export default function ProductsPage() {
         )}
       </Modal>
 
-      {/* Manage categories */}
-      <CategoryManager
-        open={catOpen}
-        onClose={() => setCatOpen(false)}
-        categories={categories}
-        counts={countFor}
-        onAdd={addCategory}
-        onDelete={deleteCategory}
-      />
     </div>
   );
 }
@@ -287,80 +263,6 @@ function DetailRow({ label, value }: { label: string; value: string }) {
       <span className="text-slate-400">{label}</span>
       <span className="font-semibold text-slate-700 text-right">{value}</span>
     </div>
-  );
-}
-
-function CategoryManager({
-  open,
-  onClose,
-  categories,
-  counts,
-  onAdd,
-  onDelete,
-}: {
-  open: boolean;
-  onClose: () => void;
-  categories: { id: string; name: string }[];
-  counts: (id: string) => number;
-  onAdd: (name: string) => void;
-  onDelete: (id: string) => void;
-}) {
-  const [name, setName] = useState("");
-  return (
-    <Modal open={open} onClose={onClose} title="Manage Categories">
-      <div className="flex gap-2 mb-4">
-        <Input
-          placeholder="New category name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && name.trim()) {
-              onAdd(name);
-              setName("");
-            }
-          }}
-        />
-        <Button
-          onClick={() => {
-            if (name.trim()) {
-              onAdd(name);
-              setName("");
-            }
-          }}
-        >
-          Add
-        </Button>
-      </div>
-      <div className="space-y-2">
-        {categories.length === 0 && (
-          <p className="text-sm text-slate-400 text-center py-4">No categories yet.</p>
-        )}
-        {categories.map((c) => (
-          <div
-            key={c.id}
-            className="flex items-center justify-between bg-slate-50 rounded-xl px-3 py-2.5"
-          >
-            <div>
-              <p className="font-semibold text-slate-700">{c.name}</p>
-              <p className="text-xs text-slate-400">{counts(c.id)} products</p>
-            </div>
-            <button
-              className="text-rose-500 text-sm font-semibold"
-              onClick={() => {
-                if (
-                  confirm(
-                    `Delete category "${c.name}"? Products will become Uncategorized.`
-                  )
-                )
-                  onDelete(c.id);
-              }}
-            >
-              Delete
-            </button>
-          </div>
-        ))}
-      </div>
-    </Modal>
   );
 }
 
